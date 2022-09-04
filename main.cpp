@@ -2,27 +2,27 @@
 #include <iomanip>
 #include <cassert>
 #include <unordered_map>
+#include <vector>
 
 enum action_t: int {fisherman, grocer1, grocer2, grocer3, grocer4, grocer5,
                     woolenweaver, colonist, peatcutter, dikebuilder1,
                     dikebuilder2, clayworker, farmer, forester, woodcutter,
                     master};
 
-enum resource_t: int {wood, timber, clay, brick,
-                      peat, uncutpeat,
-                      food, grain, flax, wool, hide,
-                      linen, leather, woolen,
-                      summerwear, leatherwear, winterwear,
-                      sheep, cattle, horse,
-                      fishtrap, fleshingbeam, weavingloom, slaughteringtable,
-                      spade, shovel, potterywheel, oven, axe, workbench};
+// enum resource_t: int {wood, timber, clay, brick,
+//                       peat, uncutpeat,
+//                       food, grain, flax, wool, hide,
+//                       linen, leather, woolen,
+//                       summerwear, leatherwear, winterwear,
+//                       sheep, cattle, horse,
+//                       fishtrap, fleshingbeam, weavingloom, slaughteringtable,
+//                       spade, shovel, potterywheel, oven, axe, workbench};
 
 class Resource {
   private:
-    std::string name;
-    int max = 10;
-    int min = 0;
-    int amount = 0;
+    int max;
+    int min;
+    int amount;
 
   public:
     // returns how many used
@@ -51,57 +51,26 @@ class Resource {
       return amount;
     }
 
+    int get_space() {
+      return max - amount;
+    }
+
     // TODO: only used by animals, can bring to animal class once made
     void setmax(int newmax) {
       max = newmax;
     }
 
-    Resource(std::string name) {
-      static std::unordered_map<std::string, std::array<int,3>> r_lut = {
-        {"wood",              {0, 99, 4}},
-        {"timber",            {0, 99, 0}},
-        {"clay",              {0, 99, 4}},
-        {"brick",             {0, 99, 0}},
-        {"peat",              {0, 99, 3}},
-        {"uncutpeat",         {0, 16, 4}},
-        {"food",              {0, 30, 5}},
-        {"grain",             {0, 15, 2}},
-        {"flax",              {0, 15, 3}},
-        {"wool",              {0, 15, 4}},
-        {"hide",              {0, 15, 1}},
-        {"linen",             {0, 15, 0}},
-        {"leather",           {0, 99, 0}},
-        {"woolen",            {0, 99, 0}},
-        {"summerwear",        {0, 99, 0}},
-        {"leatherwear",       {0, 99, 0}},
-        {"winterwear",        {0, 99, 0}},
-        {"sheep",             {0, 99, 0}},
-        {"cattle",            {0, 99, 0}},
-        {"horse",             {0, 99, 1}},
-        {"fishtrap",          {2,  6, 2}},
-        {"fleshingbeam",      {3,  6, 3}}, // 3->5->6
-        {"weavingloom",       {2,  5, 2}},
-        {"slaughteringtable", {2,  4, 2}},
-        {"spade",             {3,  7, 3}}, // 3->5->7
-        {"shovel",            {3,  6, 3}},
-        {"potterywheel",      {2,  4, 2}},
-        {"oven",              {1,  4, 1}},
-        {"axe",               {3,  6, 3}},
-        {"workbench",         {2,  4, 2}}
-      }; 
-      auto it = r_lut.find(name);
-      // resource must be in the table
-      assert(it != r_lut.end());
-      this->name = name;
-      this->min = it->second[0];
-      this->max = it->second[1];
-      this->amount = it->second[2];
+    Resource(int min, int max, int amount) {
+      this->min    = min;
+      this->max    = max;
+      this->amount = amount;
     }
 };
 
 class Player {
   public:
     // TODO: put all these into an array for easier looping etc
+    // TODO: put all these into private
     Resource wood, timber, clay, brick;
     // always use uncutpeat first when cutting since no checks implemented
     Resource peat, uncutpeat;
@@ -114,17 +83,94 @@ class Player {
     Resource fishtrap, fleshingbeam, weavingloom, slaughteringtable, spade;
     Resource shovel, potterywheel, oven, axe, workbench;
 
+    std::unordered_map<std::string, Resource&> r_lut = {
+      {"wood", wood},
+      {"timber", timber},
+      {"clay", clay},
+      {"brick", brick},
+      {"peat", peat},
+      {"uncutpeat", uncutpeat},
+      {"food", food},
+      {"grain", grain},
+      {"flax", flax},
+      {"wool", wool},
+      {"hide", hide},
+      {"linen", linen},
+      {"leather", leather},
+      {"woolen", woolen},
+      {"summerwear", summerwear},
+      {"leatherwear", leatherwear},
+      {"winterwear", winterwear},
+      {"sheep", sheep},
+      {"cattle", cattle},
+      {"horse", horse},
+      {"fishtrap", fishtrap},
+      {"fleshingbeam", fleshingbeam},
+      {"weavingloom", weavingloom},
+      {"slaughteringtable", slaughteringtable},
+      {"spade", spade},
+      {"shovel", shovel},
+      {"potterywheel", potterywheel},
+      {"oven", oven},
+      {"axe", axe},
+      {"workbench", workbench}
+    };
+
+    Resource find(std::string name) {
+      auto it = r_lut.find(name);
+      // TODO: add some error handling here
+      // if (it != r_lut.end()) {
+        return it->second;
+      // }
+    }
+
+    int use(std::string name, int cost) {
+      return find(name).use(cost);
+    }
+
+    int add(std::string name, int gain) {
+      return find(name).add(gain);
+    }
+
+    int get(std::string name) {
+      return find(name).get();
+    }
+
+    int get_space(std::string name) {
+      return find(name).get_space();
+    }
+
     Player():
-      wood("wood"), timber("timber"), clay("clay"), brick("brick"),
-      peat("peat"), uncutpeat("uncutpeat"),
-      food("food"), grain("grain"), flax("flax"), wool("wool"), hide("hide"),
-      linen("linen"), leather("leather"), woolen("woolen"),
-      summerwear("summerwear"), leatherwear("leatherwear"), winterwear("winterwear"),
-      sheep("sheep"), cattle("cattle"), horse("horse"),
-      fishtrap("fishtrap"), fleshingbeam("fleshingbeam"),
-      weavingloom("weavingloom"), slaughteringtable("slaughteringtable"),
-      spade("spade"), shovel("shovel"), potterywheel("potterywheel"),
-      oven("oven"), axe("axe"), workbench("workbench") {}
+      wood              (0, 99, 4),
+      timber            (0, 99, 0),
+      clay              (0, 99, 4),
+      brick             (0, 99, 0),
+      peat              (0, 99, 3),
+      uncutpeat         (0, 16, 4),
+      food              (0, 30, 5),
+      grain             (0, 15, 2),
+      flax              (0, 15, 3),
+      wool              (0, 15, 4),
+      hide              (0, 15, 1),
+      linen             (0, 15, 0),
+      leather           (0, 99, 0),
+      woolen            (0, 99, 0),
+      summerwear        (0, 99, 0),
+      leatherwear       (0, 99, 0),
+      winterwear        (0, 99, 0),
+      sheep             (0, 99, 0),
+      cattle            (0, 99, 0),
+      horse             (0, 99, 1),
+      fishtrap          (2,  6, 2),
+      fleshingbeam      (3,  6, 3), // 3->5->6
+      weavingloom       (2,  5, 2),
+      slaughteringtable (2,  4, 2),
+      spade             (3,  7, 3), // 3->5->7
+      shovel            (3,  6, 3),
+      potterywheel      (2,  4, 2),
+      oven              (1,  4, 1),
+      axe               (3,  6, 3),
+      workbench         (2,  4, 2) {}
 
     void print() {
       std::cout << "wood/timber clay/brick peat/uncut" << std::endl;
@@ -165,10 +211,6 @@ class Player {
       std::cout << std::endl;
     }
 };
-
-// bool action_is_valid(Player &p, action_t action) {
-//   return true;
-// }
 
 void action(Player &p, action_t action) {
   switch(action) {
@@ -248,6 +290,37 @@ void action(Player &p, action_t action) {
   }
 }
 
+bool check_move_cost (Player &p, std::unordered_map<std::string, int> reqs) {
+  for (auto& it: reqs) {
+    if (p.get(it.first) < it.second) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool check_move_useful (Player &p, std::unordered_map<std::string, int> gains) {
+  for (auto& it: gains) {
+    if (p.get_space(it.first) < it.second) {
+      return false;
+    }
+  }
+  return true;
+}
+
+std::vector<std::string> get_good_moves (Player &p) {
+  std::vector<std::string> move_list;
+  std::unordered_map<std::string, int> gains;
+  gains = {{"sheep", 1}, {"fishtrap", 1}, {"food", p.get("fishtrap")}};
+  bool useful = false;
+  useful = check_move_useful(p, gains);
+  if(useful) {
+    move_list.push_back("fm");
+  }
+  
+  return move_list;
+}
+
 int main() {
   Player p1;
   std::string input;
@@ -270,15 +343,30 @@ int main() {
     {"ma", master}
   };
 
+  std::vector<std::string> good_moves;
+  good_moves = get_good_moves(p1);
+  for (auto& it: good_moves) {
+    std::cout << it << " ";
+  }
+  std::cout << std::endl;
+
   std::cin >> input;
   while(input != "q") {
     auto it = input_lut.find(input);
     if (it != input_lut.end()) {
       action(p1, it->second);
-      p1.print();
     } else {
       std::cout << "bad instruction" << std::endl;
     }
+
+    p1.print();
+
+    // TODO: repeated code
+    good_moves = get_good_moves(p1);
+    for (auto &it: good_moves) {
+      std::cout << it << " ";
+    }
+    std::cout << std::endl;
     std::cin >> input;
   }
 
