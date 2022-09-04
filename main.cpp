@@ -9,14 +9,14 @@ enum action_t: int {fisherman, grocer1, grocer2, grocer3, grocer4, grocer5,
                     dikebuilder2, clayworker, farmer, forester, woodcutter,
                     master};
 
-// enum resource_t: int {wood, timber, clay, brick,
-//                       peat, uncutpeat,
-//                       food, grain, flax, wool, hide,
-//                       linen, leather, woolen,
-//                       summerwear, leatherwear, winterwear,
-//                       sheep, cattle, horse,
-//                       fishtrap, fleshingbeam, weavingloom, slaughteringtable,
-//                       spade, shovel, potterywheel, oven, axe, workbench};
+enum resource_t: int {wood, timber, clay, brick,
+                      peat, uncutpeat,
+                      food, grain, flax, wool, hide,
+                      linen, leather, woolen,
+                      summerwear, leatherwear, winterwear,
+                      sheep, cattle, horse,
+                      fishtrap, fleshingbeam, weavingloom, slaughteringtable,
+                      spade, shovel, potterywheel, oven, axe, workbench};
 
 class Resource {
   private:
@@ -68,145 +68,137 @@ class Resource {
 };
 
 class Player {
-  public:
+  private:
     // TODO: put all these into an array for easier looping etc
-    // TODO: put all these into private
-    Resource wood, timber, clay, brick;
+    Resource r_wood, r_timber, r_clay, r_brick;
     // always use uncutpeat first when cutting since no checks implemented
-    Resource peat, uncutpeat;
-    Resource food, grain, flax, wool, hide;
-    Resource linen, leather, woolen;
-    Resource summerwear, leatherwear, winterwear;
+    Resource r_peat, r_uncutpeat;
+    Resource r_food, r_grain, r_flax, r_wool, r_hide;
+    Resource r_linen, r_leather, r_woolen;
+    Resource r_summerwear, r_leatherwear, r_winterwear;
     // TODO: extend resource class for animals?
-    Resource sheep, cattle, horse;
+    Resource r_sheep, r_cattle, r_horse;
     // TODO: probably need different class for upgrades
-    Resource fishtrap, fleshingbeam, weavingloom, slaughteringtable, spade;
-    Resource shovel, potterywheel, oven, axe, workbench;
+    Resource r_fishtrap, r_fleshingbeam, r_weavingloom, r_slaughteringtable;
+    Resource r_spade, r_shovel, r_potterywheel, r_oven, r_axe, r_workbench;
 
-    std::unordered_map<std::string, Resource&> r_lut = {
-      {"wood", wood},
-      {"timber", timber},
-      {"clay", clay},
-      {"brick", brick},
-      {"peat", peat},
-      {"uncutpeat", uncutpeat},
-      {"food", food},
-      {"grain", grain},
-      {"flax", flax},
-      {"wool", wool},
-      {"hide", hide},
-      {"linen", linen},
-      {"leather", leather},
-      {"woolen", woolen},
-      {"summerwear", summerwear},
-      {"leatherwear", leatherwear},
-      {"winterwear", winterwear},
-      {"sheep", sheep},
-      {"cattle", cattle},
-      {"horse", horse},
-      {"fishtrap", fishtrap},
-      {"fleshingbeam", fleshingbeam},
-      {"weavingloom", weavingloom},
-      {"slaughteringtable", slaughteringtable},
-      {"spade", spade},
-      {"shovel", shovel},
-      {"potterywheel", potterywheel},
-      {"oven", oven},
-      {"axe", axe},
-      {"workbench", workbench}
+  public:
+    std::unordered_map<resource_t, Resource&> r_lut = {
+      {wood, r_wood},
+      {timber, r_timber},
+      {clay, r_clay},
+      {brick, r_brick},
+      {peat, r_peat},
+      {uncutpeat, r_uncutpeat},
+      {food, r_food},
+      {grain, r_grain},
+      {flax, r_flax},
+      {wool, r_wool},
+      {hide, r_hide},
+      {linen, r_linen},
+      {leather, r_leather},
+      {woolen, r_woolen},
+      {summerwear, r_summerwear},
+      {leatherwear, r_leatherwear},
+      {winterwear, r_winterwear},
+      {sheep, r_sheep},
+      {cattle, r_cattle},
+      {horse, r_horse},
+      {fishtrap, r_fishtrap},
+      {fleshingbeam, r_fleshingbeam},
+      {weavingloom, r_weavingloom},
+      {slaughteringtable, r_slaughteringtable},
+      {spade, r_spade},
+      {shovel, r_shovel},
+      {potterywheel, r_potterywheel},
+      {oven, r_oven},
+      {axe, r_axe},
+      {workbench, r_workbench}
     };
 
-    Resource find(std::string name) {
-      auto it = r_lut.find(name);
-      // TODO: add some error handling here
-      // if (it != r_lut.end()) {
-        return it->second;
-      // }
+    int use(resource_t name, int cost) {
+      return r_lut.at(name).use(cost);
     }
 
-    int use(std::string name, int cost) {
-      return find(name).use(cost);
+    int add(resource_t name, int gain) {
+      return r_lut.at(name).add(gain);
     }
 
-    int add(std::string name, int gain) {
-      return find(name).add(gain);
+    int get(resource_t name) {
+      return r_lut.at(name).get();
     }
 
-    int get(std::string name) {
-      return find(name).get();
-    }
-
-    int get_space(std::string name) {
-      return find(name).get_space();
+    int get_space(resource_t name) {
+      return r_lut.at(name).get_space();
     }
 
     Player():
-      wood              (0, 99, 4),
-      timber            (0, 99, 0),
-      clay              (0, 99, 4),
-      brick             (0, 99, 0),
-      peat              (0, 99, 3),
-      uncutpeat         (0, 16, 4),
-      food              (0, 30, 5),
-      grain             (0, 15, 2),
-      flax              (0, 15, 3),
-      wool              (0, 15, 4),
-      hide              (0, 15, 1),
-      linen             (0, 15, 0),
-      leather           (0, 99, 0),
-      woolen            (0, 99, 0),
-      summerwear        (0, 99, 0),
-      leatherwear       (0, 99, 0),
-      winterwear        (0, 99, 0),
-      sheep             (0, 99, 0),
-      cattle            (0, 99, 0),
-      horse             (0, 99, 1),
-      fishtrap          (2,  6, 2),
-      fleshingbeam      (3,  6, 3), // 3->5->6
-      weavingloom       (2,  5, 2),
-      slaughteringtable (2,  4, 2),
-      spade             (3,  7, 3), // 3->5->7
-      shovel            (3,  6, 3),
-      potterywheel      (2,  4, 2),
-      oven              (1,  4, 1),
-      axe               (3,  6, 3),
-      workbench         (2,  4, 2) {}
+      r_wood              (0, 99, 4),
+      r_timber            (0, 99, 0),
+      r_clay              (0, 99, 4),
+      r_brick             (0, 99, 0),
+      r_peat              (0, 99, 3),
+      r_uncutpeat         (0, 16, 4),
+      r_food              (0, 30, 5),
+      r_grain             (0, 15, 2),
+      r_flax              (0, 15, 3),
+      r_wool              (0, 15, 4),
+      r_hide              (0, 15, 1),
+      r_linen             (0, 15, 0),
+      r_leather           (0, 99, 0),
+      r_woolen            (0, 99, 0),
+      r_summerwear        (0, 99, 0),
+      r_leatherwear       (0, 99, 0),
+      r_winterwear        (0, 99, 0),
+      r_sheep             (0, 99, 0),
+      r_cattle            (0, 99, 0),
+      r_horse             (0, 99, 1),
+      r_fishtrap          (2,  6, 2),
+      r_fleshingbeam      (3,  6, 3), // 3->5->6
+      r_weavingloom       (2,  5, 2),
+      r_slaughteringtable (2,  4, 2),
+      r_spade             (3,  7, 3), // 3->5->7
+      r_shovel            (3,  6, 3),
+      r_potterywheel      (2,  4, 2),
+      r_oven              (1,  4, 1),
+      r_axe               (3,  6, 3),
+      r_workbench         (2,  4, 2) {}
 
     void print() {
       std::cout << "wood/timber clay/brick peat/uncut" << std::endl;
-      std::cout << std::setw(4) << wood.get() << std::setw(7) << timber.get()
-                << std::setw(5) << clay.get() << std::setw(6) << brick.get()
-                << std::setw(5) << peat.get() << std::setw(6) << uncutpeat.get()
+      std::cout << std::setw(4) << r_wood.get() << std::setw(7) << r_timber.get()
+                << std::setw(5) << r_clay.get() << std::setw(6) << r_brick.get()
+                << std::setw(5) << r_peat.get() << std::setw(6) << r_uncutpeat.get()
                 << std::endl;
       std::cout << std::endl;
       std::cout << "food grain flax wool hide" << std::endl;
-      std::cout << std::setw(4) << food.get() << std::setw(6) << grain.get()
-                << std::setw(5) << flax.get() << std::setw(5) << wool.get()
-                << std::setw(5) << hide.get() << std::endl;
+      std::cout << std::setw(4) << r_food.get() << std::setw(6) << r_grain.get()
+                << std::setw(5) << r_flax.get() << std::setw(5) << r_wool.get()
+                << std::setw(5) << r_hide.get() << std::endl;
       std::cout << std::endl;
       std::cout << "linen/wear leather/wear woolen/wear" << std::endl;
-      std::cout << std::setw(5) << linen.get() << std::setw(5) << summerwear.get()
-                << std::setw(8) << leather.get() << std::setw(5) << leatherwear.get()
-                << std::setw(7) << woolen.get() << std::setw(5) << winterwear.get()
+      std::cout << std::setw(5) << r_linen.get() << std::setw(5) << r_summerwear.get()
+                << std::setw(8) << r_leather.get() << std::setw(5) << r_leatherwear.get()
+                << std::setw(7) << r_woolen.get() << std::setw(5) << r_winterwear.get()
                 << std::endl;
       std::cout << std::endl;
       std::cout << "sheep cattle horse" << std::endl;
-      std::cout << std::setw(5) << sheep.get() << std::setw(7) << cattle.get()
-                << std::setw(6) << horse.get() << std::endl;
+      std::cout << std::setw(5) << r_sheep.get() << std::setw(7) << r_cattle.get()
+                << std::setw(6) << r_horse.get() << std::endl;
       std::cout << std::endl;
 
-      std::cout << "fish traps: " << fishtrap.get()
-                << " fleshing beams: " << fleshingbeam.get()
-                << " weaving looms: " << weavingloom.get()
+      std::cout << "fish traps: " << r_fishtrap.get()
+                << " fleshing beams: " << r_fleshingbeam.get()
+                << " weaving looms: " << r_weavingloom.get()
                 << std::endl;
-      std::cout << "slaughtering table: " << slaughteringtable.get()
-                << " spades: " << spade.get()
-                << " shovels: " << shovel.get()
+      std::cout << "slaughtering table: " << r_slaughteringtable.get()
+                << " spades: " << r_spade.get()
+                << " shovels: " << r_shovel.get()
                 << std::endl;
-      std::cout << "pottery wheels: " << potterywheel.get()
-                << " ovens: " << oven.get()
-                << " axes: "<< axe.get()
-                << " workbenches: " << workbench.get()
+      std::cout << "pottery wheels: " << r_potterywheel.get()
+                << " ovens: " << r_oven.get()
+                << " axes: "<< r_axe.get()
+                << " workbenches: " << r_workbench.get()
                 << std::endl;
       std::cout << std::endl;
     }
@@ -215,61 +207,61 @@ class Player {
 void action(Player &p, action_t action) {
   switch(action) {
     case fisherman:
-      p.sheep.add(1);
-      p.fishtrap.add(1);
-      p.food.add(p.fishtrap.get());
+      p.add(sheep, 1);
+      p.add(fishtrap, 1);
+      p.add(food, p.get(fishtrap));
       break;
     case grocer1:
-      p.timber.add(1);
-      p.grain.add(1);
-      p.leather.add(1);
+      p.add(timber, 1);
+      p.add(grain, 1);
+      p.add(leather, 1);
       break;
     case grocer2:
-      p.brick.add(1);
-      p.grain.add(1);
-      p.leather.add(1);
+      p.add(brick, 1);
+      p.add(grain, 1);
+      p.add(leather, 1);
       break;
     case grocer3:
-      p.sheep.add(1);
-      p.grain.add(1);
-      p.leather.add(1);
+      p.add(sheep, 1);
+      p.add(grain, 1);
+      p.add(leather, 1);
       break;
     case grocer4:
-      p.cattle.add(1);
-      p.grain.add(1);
-      p.leather.add(1);
+      p.add(cattle, 1);
+      p.add(grain, 1);
+      p.add(leather, 1);
       break;
     case grocer5:
-      p.horse.add(1);
-      p.grain.add(1);
-      p.leather.add(1);
+      p.add(horse, 1);
+      p.add(grain, 1);
+      p.add(leather, 1);
       break;
     case woolenweaver:
       // always use as much as you can
       int wool_used;
-      wool_used = p.wool.use(p.weavingloom.get());
-      p.woolen.add(wool_used);
+      wool_used = p.use(wool, p.get(weavingloom));
+      p.add(woolen, wool_used);
       break;
     case colonist:
-      p.horse.add(1);
+      p.add(horse, 1);
       // TODO: add moor tile flipping
       break;
     case peatcutter:
       // always use as much as you can
       int peat_cut;
-      peat_cut = p.uncutpeat.use(p.spade.get());
-      p.peat.add(peat_cut);
+      peat_cut = p.use(uncutpeat, p.get(spade));
+      p.add(peat, peat_cut);
       break;
     case dikebuilder1:
-      p.sheep.add(1);
+      p.add(sheep, 1);
       // TODO: add dike building
       break;
     case dikebuilder2:
-      p.cattle.add(1);
+      p.add(cattle, 1);
       // TODO: add dike building
       break;
     case clayworker:
-      p.clay.add(p.shovel.get());
+      p.add(clay, p.get(shovel));
       break;
     case farmer:
       // TODO: add buy plow
@@ -277,12 +269,12 @@ void action(Player &p, action_t action) {
       // TODO: figure out how to deal with grain vs flax choices per field
       break;
     case forester:
-      p.food.use(1); // TODO: this is a requirement, add valid checks
+      p.use(food, 1); // TODO: this is a requirement, add valid checks
       // TODO: add build forest
       // TODO: add build building
       break;
     case woodcutter:
-      p.wood.add(p.axe.get());
+      p.add(wood, p.get(axe));
       break;
     case master:
       // TODO: figure out how to deal with upgrading variable number of tools
@@ -290,7 +282,7 @@ void action(Player &p, action_t action) {
   }
 }
 
-bool check_move_cost (Player &p, std::unordered_map<std::string, int> reqs) {
+bool check_move_cost (Player &p, std::unordered_map<resource_t, int> reqs) {
   for (auto& it: reqs) {
     if (p.get(it.first) < it.second) {
       return false;
@@ -299,7 +291,7 @@ bool check_move_cost (Player &p, std::unordered_map<std::string, int> reqs) {
   return true;
 }
 
-bool check_move_useful (Player &p, std::unordered_map<std::string, int> gains) {
+bool check_move_useful (Player &p, std::unordered_map<resource_t, int> gains) {
   for (auto& it: gains) {
     if (p.get_space(it.first) < it.second) {
       return false;
@@ -310,8 +302,8 @@ bool check_move_useful (Player &p, std::unordered_map<std::string, int> gains) {
 
 std::vector<std::string> get_good_moves (Player &p) {
   std::vector<std::string> move_list;
-  std::unordered_map<std::string, int> gains;
-  gains = {{"sheep", 1}, {"fishtrap", 1}, {"food", p.get("fishtrap")}};
+  std::unordered_map<resource_t, int> gains;
+  gains = {{sheep, 1}, {fishtrap, 1}, {food, p.get(fishtrap)}};
   bool useful = false;
   useful = check_move_useful(p, gains);
   if(useful) {
@@ -320,6 +312,10 @@ std::vector<std::string> get_good_moves (Player &p) {
   
   return move_list;
 }
+
+// void perform_action (Player &p, std::string action) {
+// 
+// }
 
 int main() {
   Player p1;
