@@ -93,30 +93,50 @@ class Player {
       }
     }
 
-    int score_animals (int* a) {
-      std::sort(a, a + 3);
-      return 4 * a[0] + 2 * a[1];
+    int score_animals () {
+      int animals[3] = {r_sheep.get(), r_cattle.get(), r_horse.get()};
+      std::sort(animals, animals + 3);
+      return 4 * animals[0] + 2 * animals[1];
+    }
+
+    int score_tools () {
+      int sum = 0;
+      if (r_fishtrap.get() == 6) { sum += 6; };
+      if (r_fleshingbeam.get() == 5) { sum += 2; };
+      if (r_fleshingbeam.get() == 6) { sum += 6; };
+      if (r_weavingloom.get() == 3) { sum += 2; };
+      if (r_weavingloom.get() == 4) { sum += 6; };
+      if (r_weavingloom.get() == 5) { sum += 8; };
+      if (r_slaughteringtable.get() == 3) { sum += 2; };
+      if (r_slaughteringtable.get() == 4) { sum += 4; };
+      if (r_spade.get() == 7) { sum += 4; };
+      if (r_potterywheel.get() == 4) { sum += 4; };
+      if (r_oven.get() == 2) { sum += 2; };
+      if (r_oven.get() == 3) { sum += 10; };
+      if (r_oven.get() == 4) { sum += 14; };
+      if (r_workbench.get() == 3) { sum += 2; };
+      if (r_workbench.get() == 4) { sum += 8; };
+      return sum;
     }
 
     float score () {
-      int tally = 0;
-      tally += 1 * r_timber.get();
-      tally += 2 * r_brick.get();
-      tally += score_goods(r_food.get());
-      tally += score_goods(r_grain.get());
-      tally += score_goods(r_flax.get());
-      tally += score_goods(r_wool.get());
-      tally += score_goods(r_hide.get());
-      tally += 2 * r_linen.get();
-      tally += 2 * r_leather.get();
-      tally += 2 * r_woolen.get();
-      tally += 4 * r_summerwear.get();
-      tally += 5 * r_leatherwear.get();
-      tally += 5 * r_winterwear.get();
-      int animals[3] = {r_sheep.get(), r_cattle.get(), r_horse.get()};
-      tally += score_animals(animals);
-
-      return (float)tally / 2.0;
+      int sum = 0;
+      sum += 1 * r_timber.get();
+      sum += 2 * r_brick.get();
+      sum += score_goods(r_food.get());
+      sum += score_goods(r_grain.get());
+      sum += score_goods(r_flax.get());
+      sum += score_goods(r_wool.get());
+      sum += score_goods(r_hide.get());
+      sum += 2 * r_linen.get();
+      sum += 2 * r_leather.get();
+      sum += 2 * r_woolen.get();
+      sum += 4 * r_summerwear.get();
+      sum += 5 * r_leatherwear.get();
+      sum += 5 * r_winterwear.get();
+      sum += score_animals();
+      sum += score_tools();
+      return (float)sum / 2.0;
     }
 
   public:
