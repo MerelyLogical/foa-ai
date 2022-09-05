@@ -125,26 +125,6 @@ class Player {
       return sum;
     }
 
-    float score () {
-      int sum = 0;
-      sum += 1 * r_timber.get();
-      sum += 2 * r_brick.get();
-      sum += score_goods(r_food.get());
-      sum += score_goods(r_grain.get());
-      sum += score_goods(r_flax.get());
-      sum += score_goods(r_wool.get());
-      sum += score_goods(r_hide.get());
-      sum += 2 * r_linen.get();
-      sum += 2 * r_leather.get();
-      sum += 2 * r_woolen.get();
-      sum += 4 * r_summerwear.get();
-      sum += 5 * r_leatherwear.get();
-      sum += 5 * r_winterwear.get();
-      sum += score_animals();
-      sum += score_tools();
-      return (float)sum / 2.0;
-    }
-
   public:
     std::unordered_map<resource_t, Resource&> r_lut = {
       {wood, r_wood},
@@ -193,6 +173,26 @@ class Player {
 
     int get_space(resource_t name) {
       return r_lut.at(name).get_space();
+    }
+
+    float score () {
+      int sum = 0;
+      sum += 1 * r_timber.get();
+      sum += 2 * r_brick.get();
+      sum += score_goods(r_food.get());
+      sum += score_goods(r_grain.get());
+      sum += score_goods(r_flax.get());
+      sum += score_goods(r_wool.get());
+      sum += score_goods(r_hide.get());
+      sum += 2 * r_linen.get();
+      sum += 2 * r_leather.get();
+      sum += 2 * r_woolen.get();
+      sum += 4 * r_summerwear.get();
+      sum += 5 * r_leatherwear.get();
+      sum += 5 * r_winterwear.get();
+      sum += score_animals();
+      sum += score_tools();
+      return (float)sum / 2.0;
     }
 
     Player():
@@ -402,47 +402,48 @@ mlist_t get_good_moves (Player &p) {
   return mlist;
 }
 
+void evaluate_moves (Player &p, int depth, std::string history) {
+  mlist_t temp_moves = get_good_moves(p);
+  for (auto& it: temp_moves) {
+    Player p_temp = p;
+    std::string temp_hist = history + " " + it.first;
+    perform_action(p_temp, it.second);
+    if (depth != 0) {
+      evaluate_moves(p_temp, depth-1, temp_hist);
+    } else {
+      std::cout << temp_hist << ": " << p_temp.score() << std::endl;
+    }
+  }
+}
+
 int main() {
   Player p1;
-  std::string input;
+  // std::string input;
 
-  mlist_t good_moves;
+  // mlist_t good_moves;
 
-  p1.print();
-  good_moves = get_good_moves(p1);
-  for (auto& it: good_moves) {
-    std::cout << it.first << " ";
-  }
-  std::cout << std::endl;
+  // p1.print();
 
-  // evaluate possible moves
-  for (auto& it: good_moves) {
-    Player p_temp = p1;  // hopefully this doesn't affect p1
-    perform_action(p_temp, it.second);
-    std::cout << "------------" << std::endl;
-    std::cout << it.first << ": " << std::endl;
-    p_temp.print();
-    std::cout << std::endl;
-  }
+  evaluate_moves(p1, 2, "");
 
-  std::cin >> input;
-  while(input != "q") {
-    auto it = good_moves.find(input);
-    if (it != good_moves.end()) {
-      perform_action(p1, it->second);
-    } else {
-      std::cout << "bad instruction" << std::endl;
-    }
+  // std::cin >> input;
+  // while(input != "q") {
+  //   auto it = good_moves.find(input);
+  //   if (it != good_moves.end()) {
+  //     perform_action(p1, it->second);
+  //   } else {
+  //     std::cout << "bad instruction" << std::endl;
+  //   }
 
-    // TODO: repeated code
-    p1.print();
-    good_moves = get_good_moves(p1);
-    for (auto &it: good_moves) {
-      std::cout << it.first << " ";
-    }
-    std::cout << std::endl;
-    std::cin >> input;
-  }
+  //   // TODO: repeated code
+  //   p1.print();
+  //   good_moves = get_good_moves(p1);
+  //   for (auto &it: good_moves) {
+  //     std::cout << it.first << " ";
+  //   }
+  //   std::cout << std::endl;
+  //   std::cin >> input;
+  // }
 
   return 0;
 }
