@@ -282,6 +282,7 @@ class Player {
 // }
 
 typedef std::unordered_map<resource_t, int> rlist_t;
+typedef std::unordered_map<std::string, rlist_t> mlist_t;
 
 // bool check_move_cost (Player &p, rlist_t reqs) {
 //   for (auto& it: reqs) {
@@ -298,7 +299,7 @@ bool check_move_useful (Player &p, rlist_t rlist) {
       if (p.get_space(it.first) < it.second) {
         return false;
       }
-    } else (it.second < 0) {
+    } else if (it.second < 0) {
       if (p.get(it.first) < it.second) {
         return false;
       }
@@ -308,25 +309,40 @@ bool check_move_useful (Player &p, rlist_t rlist) {
 }
 
 void perform_action (Player &p, rlist_t rlist) {
-  for (auto& it: costs) {
+  for (auto& it: rlist) {
     if (it.second > 0) {
       p.add(it.first, it.second);
-    } else (it.second < 0) {
+    } else if (it.second < 0) {
       p.use(it.first, it.second);
     }
   }
 }
 
-std::vector<std::string> get_good_moves (Player &p) {
-  std::vector<std::string> move_list;
+mlist_t get_good_moves (Player &p) {
+  mlist_t mlist;
+  std::string move_command;
   rlist_t rlist;
+  bool useful;
+
+  // TODO: try make this into functions/loop
+  move_command = "fm";
   rlist = {{sheep, 1}, {fishtrap, 1}, {food, p.get(fishtrap)}};
-  bool useful = false;
-  useful = check_move_useful(p, gains);
+
+  useful = check_move_useful(p, rlist);
   if(useful) {
-    move_list.push_back("fm");
+    mlist[move_command] = rlist;
   }
-  return move_list;
+
+  // repeating for grocer
+  move_command = "gr";
+  rlist = {{timber, 1}, {grain, 1}, {leather, 1}};
+
+  useful = check_move_useful(p, rlist);
+  if(useful) {
+    mlist[move_command] = rlist;
+  }
+
+  return mlist;
 }
 
 // TODO: have a unordered_map<string action_name, rlist_t rlist>
@@ -356,18 +372,19 @@ int main() {
   //   {"ma", master}
   // };
 
-  std::vector<std::string> good_moves;
+  mlist_t good_moves;
+
   good_moves = get_good_moves(p1);
   for (auto& it: good_moves) {
-    std::cout << it << " ";
+    std::cout << it.first << " ";
   }
   std::cout << std::endl;
 
   std::cin >> input;
   while(input != "q") {
-    auto it = input_lut.find(input);
-    if (it != input_lut.end()) {
-      action(p1, it->second);
+    auto it = good_moves.find(input);
+    if (it != good_moves.end()) {
+      perform_action(p1, it->second);
     } else {
       std::cout << "bad instruction" << std::endl;
     }
@@ -377,7 +394,7 @@ int main() {
     // TODO: repeated code
     good_moves = get_good_moves(p1);
     for (auto &it: good_moves) {
-      std::cout << it << " ";
+      std::cout << it.first << " ";
     }
     std::cout << std::endl;
     std::cin >> input;
