@@ -1,13 +1,9 @@
 #include <iostream>
+#include <algorithm>
 #include <iomanip>
 #include <cassert>
 #include <unordered_map>
 #include <vector>
-
-// enum action_t: int {fisherman, grocer1, grocer2, grocer3, grocer4, grocer5,
-//                     woolenweaver, colonist, peatcutter, dikebuilder1,
-//                     dikebuilder2, clayworker, farmer, forester, woodcutter,
-//                     master};
 
 enum resource_t: int {wood, timber, clay, brick,
                       peat, uncutpeat,
@@ -80,6 +76,48 @@ class Player {
     // TODO: probably need different class for upgrades
     Resource r_fishtrap, r_fleshingbeam, r_weavingloom, r_slaughteringtable;
     Resource r_spade, r_shovel, r_potterywheel, r_oven, r_axe, r_workbench;
+
+    // all points doubled
+    int score_goods (int a) {
+      switch (a) {
+        case  0 ...  6: return  0;
+        case  7 ... 10: return  2;
+        case 11 ... 14: return  4;
+        case 15 ... 21: return  6;
+        case 22 ... 25: return  8;
+        case 26 ... 29: return 10;
+        case 30:        return 12;
+        default:
+          std::cout << "score error" << std::endl;
+          return 0;
+      }
+    }
+
+    int score_animals (int* a) {
+      std::sort(a, a + 3);
+      return 4 * a[0] + 2 * a[1];
+    }
+
+    float score () {
+      int tally = 0;
+      tally += 1 * r_timber.get();
+      tally += 2 * r_brick.get();
+      tally += score_goods(r_food.get());
+      tally += score_goods(r_grain.get());
+      tally += score_goods(r_flax.get());
+      tally += score_goods(r_wool.get());
+      tally += score_goods(r_hide.get());
+      tally += 2 * r_linen.get();
+      tally += 2 * r_leather.get();
+      tally += 2 * r_woolen.get();
+      tally += 4 * r_summerwear.get();
+      tally += 5 * r_leatherwear.get();
+      tally += 5 * r_winterwear.get();
+      int animals[3] = {r_sheep.get(), r_cattle.get(), r_horse.get()};
+      tally += score_animals(animals);
+
+      return (float)tally / 2.0;
+    }
 
   public:
     std::unordered_map<resource_t, Resource&> r_lut = {
@@ -200,98 +238,13 @@ class Player {
                 << " workbenches: " << r_workbench.get()
                 << std::endl;
       std::cout << std::endl;
+      std::cout << "score: " << score() << std::endl;
+      std::cout << std::endl;
     }
 };
 
-// void action(Player &p, action_t action) {
-//   switch(action) {
-//     case fisherman:
-//       p.add(sheep, 1);
-//       p.add(fishtrap, 1);
-//       p.add(food, p.get(fishtrap));
-//       break;
-//     case grocer1:
-//       p.add(timber, 1);
-//       p.add(grain, 1);
-//       p.add(leather, 1);
-//       break;
-//     case grocer2:
-//       p.add(brick, 1);
-//       p.add(grain, 1);
-//       p.add(leather, 1);
-//       break;
-//     case grocer3:
-//       p.add(sheep, 1);
-//       p.add(grain, 1);
-//       p.add(leather, 1);
-//       break;
-//     case grocer4:
-//       p.add(cattle, 1);
-//       p.add(grain, 1);
-//       p.add(leather, 1);
-//       break;
-//     case grocer5:
-//       p.add(horse, 1);
-//       p.add(grain, 1);
-//       p.add(leather, 1);
-//       break;
-//     case woolenweaver:
-//       // always use as much as you can
-//       int wool_used;
-//       wool_used = p.use(wool, p.get(weavingloom));
-//       p.add(woolen, wool_used);
-//       break;
-//     case colonist:
-//       p.add(horse, 1);
-//       // TODO: add moor tile flipping
-//       break;
-//     case peatcutter:
-//       // always use as much as you can
-//       int peat_cut;
-//       peat_cut = p.use(uncutpeat, p.get(spade));
-//       p.add(peat, peat_cut);
-//       break;
-//     case dikebuilder1:
-//       p.add(sheep, 1);
-//       // TODO: add dike building
-//       break;
-//     case dikebuilder2:
-//       p.add(cattle, 1);
-//       // TODO: add dike building
-//       break;
-//     case clayworker:
-//       p.add(clay, p.get(shovel));
-//       break;
-//     case farmer:
-//       // TODO: add buy plow
-//       // TODO: add building farms
-//       // TODO: figure out how to deal with grain vs flax choices per field
-//       break;
-//     case forester:
-//       p.use(food, 1); // TODO: this is a requirement, add valid checks
-//       // TODO: add build forest
-//       // TODO: add build building
-//       break;
-//     case woodcutter:
-//       p.add(wood, p.get(axe));
-//       break;
-//     case master:
-//       // TODO: figure out how to deal with upgrading variable number of tools
-//       break;
-//   }
-// }
-
 typedef std::unordered_map<resource_t, int> rlist_t;
 typedef std::unordered_map<std::string, rlist_t> mlist_t;
-
-// bool check_move_cost (Player &p, rlist_t reqs) {
-//   for (auto& it: reqs) {
-//     if (p.get(it.first) < it.second) {
-//       return false;
-//     }
-//   }
-//   return true;
-// }
 
 bool check_move_useful (Player &p, rlist_t rlist) {
   for (auto& it: rlist) {
@@ -300,7 +253,7 @@ bool check_move_useful (Player &p, rlist_t rlist) {
         return false;
       }
     } else if (it.second < 0) {
-      if (p.get(it.first) < it.second) {
+      if (p.get(it.first) < -it.second) {
         return false;
       }
     }
@@ -313,7 +266,7 @@ void perform_action (Player &p, rlist_t rlist) {
     if (it.second > 0) {
       p.add(it.first, it.second);
     } else if (it.second < 0) {
-      p.use(it.first, it.second);
+      p.use(it.first, -it.second);
     }
   }
 }
@@ -322,58 +275,81 @@ mlist_t get_good_moves (Player &p) {
   mlist_t mlist;
   std::string move_command;
   rlist_t rlist;
-  bool useful;
 
-  // TODO: try make this into functions/loop
+  // TODO: try make these actions into functions/loop
   move_command = "fm";
   rlist = {{sheep, 1}, {fishtrap, 1}, {food, p.get(fishtrap)}};
-
-  useful = check_move_useful(p, rlist);
-  if(useful) {
-    mlist[move_command] = rlist;
-  }
+  // TODO: maybe just check for validity, can still be useful to take food with max fishtraps
+  if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
 
   // repeating for grocer
-  move_command = "gr";
-  rlist = {{timber, 1}, {grain, 1}, {leather, 1}};
+  resource_t choices[5] = {timber, brick, sheep, cattle, horse};
+  for (int i=0; i<5; i++) {
+    move_command = "gr" + std::to_string(i);
+    resource_t choice = choices[i];
+    rlist = {{choice, 1}, {grain, 1}, {leather, 1}};
 
-  useful = check_move_useful(p, rlist);
-  if(useful) {
+    if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
+  }
+
+  // repeating for woolenweaver
+  int wool_cost = std::min(p.get(weavingloom), p.get(wool));
+  if (wool_cost != 0) {
+    move_command = "ww" + std::to_string(wool_cost);
+    rlist = {{wool, -wool_cost}, {woolen, wool_cost}};
     mlist[move_command] = rlist;
   }
+
+  // repeating for peatcutting
+  int peat_cut = std::min(p.get(spade), p.get(uncutpeat));
+  if (peat_cut != 0) {
+    move_command = "pc" + std::to_string(peat_cut);
+    rlist = {{uncutpeat, -peat_cut}, {peat, peat_cut}};
+    mlist[move_command] = rlist;
+  }
+
+  // case colonist:
+  //   p.add(horse, 1);
+  //   // TODO: add moor tile flipping
+  //   break;
+  // case dikebuilder1:
+  //   p.add(sheep, 1);
+  //   // TODO: add dike building
+  //   break;
+  // case dikebuilder2:
+  //   p.add(cattle, 1);
+  //   // TODO: add dike building
+  //   break;
+  // case clayworker:
+  //   p.add(clay, p.get(shovel));
+  //   break;
+  // case farmer:
+  //   // TODO: add buy plow
+  //   // TODO: add building farms
+  //   // TODO: figure out how to deal with grain vs flax choices per field
+  //   break;
+  // case forester:
+  //   p.use(food, 1); // TODO: this is a requirement, add valid checks
+  //   // TODO: add build forest
+  //   // TODO: add build building
+  //   break;
+  // case woodcutter:
+  //   p.add(wood, p.get(axe));
+  //   break;
+  // case master:
+  //   // TODO: figure out how to deal with upgrading variable number of tools
+  //   break;
 
   return mlist;
 }
 
-// TODO: have a unordered_map<string action_name, rlist_t rlist>
-//       get_good_moves will make a vector of it
-//       main() will pick one in the repl loop
-//       perform_action will then perform it
-
 int main() {
   Player p1;
   std::string input;
-  // static std::unordered_map<std::string, action_t> input_lut = {
-  //   {"fm", fisherman},
-  //   {"g1", grocer1},
-  //   {"g2", grocer2},
-  //   {"g3", grocer3},
-  //   {"g4", grocer4},
-  //   {"g5", grocer5},
-  //   {"ww", woolenweaver},
-  //   {"co", colonist},
-  //   {"pc", peatcutter},
-  //   {"d1", dikebuilder1},
-  //   {"d2", dikebuilder2},
-  //   {"cw", clayworker},
-  //   {"fa", farmer},
-  //   {"fo", forester},
-  //   {"wc", woodcutter},
-  //   {"ma", master}
-  // };
 
   mlist_t good_moves;
 
+  p1.print();
   good_moves = get_good_moves(p1);
   for (auto& it: good_moves) {
     std::cout << it.first << " ";
@@ -389,9 +365,8 @@ int main() {
       std::cout << "bad instruction" << std::endl;
     }
 
-    p1.print();
-
     // TODO: repeated code
+    p1.print();
     good_moves = get_good_moves(p1);
     for (auto &it: good_moves) {
       std::cout << it.first << " ";
