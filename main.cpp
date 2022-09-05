@@ -56,6 +56,12 @@ class Resource {
       max = newmax;
     }
 
+    Resource() {
+      this->min    = 0;
+      this->max    = 0;
+      this->amount = 0;
+    }
+
     Resource(int min, int max, int amount) {
       this->min    = min;
       this->max    = max;
@@ -221,6 +227,39 @@ class Player {
       r_axe               (3,  6, 3),
       r_workbench         (2,  4, 2) {}
 
+    Player(const Player &p) {
+      r_wood = p.r_wood;
+      r_timber = p.r_timber;
+      r_clay = p.r_clay;
+      r_brick = p.r_brick;
+      r_peat = p.r_peat;
+      r_uncutpeat = p.r_uncutpeat;
+      r_food = p.r_food;
+      r_grain = p.r_grain;
+      r_flax = p.r_flax;
+      r_wool = p.r_wool;
+      r_hide = p.r_hide;
+      r_linen = p.r_linen;
+      r_leather = p.r_leather;
+      r_woolen = p.r_woolen;
+      r_summerwear = p.r_summerwear;
+      r_leatherwear = p.r_leatherwear;
+      r_winterwear = p.r_winterwear;
+      r_sheep = p.r_sheep;
+      r_cattle = p.r_cattle;
+      r_horse = p.r_horse;
+      r_fishtrap = p.r_fishtrap;
+      r_fleshingbeam = p.r_fleshingbeam;
+      r_weavingloom = p.r_weavingloom;
+      r_slaughteringtable = p.r_slaughteringtable;
+      r_spade = p.r_spade;
+      r_shovel = p.r_shovel;
+      r_potterywheel = p.r_potterywheel;
+      r_oven = p.r_oven;
+      r_axe = p.r_axe;
+      r_workbench = p.r_workbench;
+    }
+
     void print() {
       std::cout << "wood/timber clay/brick peat/uncut" << std::endl;
       std::cout << std::setw(4) << r_wood.get() << std::setw(7) << r_timber.get()
@@ -375,6 +414,16 @@ int main() {
     std::cout << it.first << " ";
   }
   std::cout << std::endl;
+
+  // evaluate possible moves
+  for (auto& it: good_moves) {
+    Player p_temp = p1;  // hopefully this doesn't affect p1
+    perform_action(p_temp, it.second);
+    std::cout << "------------" << std::endl;
+    std::cout << it.first << ": " << std::endl;
+    p_temp.print();
+    std::cout << std::endl;
+  }
 
   std::cin >> input;
   while(input != "q") {
