@@ -411,20 +411,25 @@ void evaluate_moves (Player &p, int depth, std::string history) {
     if (depth != 0) {
       evaluate_moves(p_temp, depth-1, temp_hist);
     } else {
-      std::cout << temp_hist << ": " << p_temp.score() << std::endl;
+      std::cout << temp_hist << ": " << std::fixed << std::setprecision(1) << p_temp.score() << std::endl;
     }
   }
 }
 
-int main() {
+int main(int argc, char *argv[]) {
   Player p1;
   // std::string input;
 
   // mlist_t good_moves;
 
   // p1.print();
-
-  evaluate_moves(p1, 2, "");
+  int depth;
+  if (argc > 1) {
+    depth = atoi(argv[1]);
+  } else {
+    depth = 2;
+  }
+  evaluate_moves(p1, depth, "");
 
   // std::cin >> input;
   // while(input != "q") {
