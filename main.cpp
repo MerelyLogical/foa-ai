@@ -304,6 +304,7 @@ class Player {
 
 typedef std::unordered_map<resource_t, int> rlist_t;
 typedef std::unordered_map<std::string, rlist_t> mlist_t;
+typedef std::unordered_map<std::string, float> eval_t;
 
 bool check_move_useful (Player &p, rlist_t rlist) {
   for (auto& it: rlist) {
@@ -402,16 +403,16 @@ mlist_t get_good_moves (Player &p) {
   return mlist;
 }
 
-void evaluate_moves (Player &p, int depth, std::string history) {
+void evaluate_moves (Player &p, int depth, std::string history, eval_t &scores) {
   mlist_t temp_moves = get_good_moves(p);
   for (auto& it: temp_moves) {
     Player p_temp = p;
     std::string temp_hist = history + " " + it.first;
     perform_action(p_temp, it.second);
     if (depth != 0) {
-      evaluate_moves(p_temp, depth-1, temp_hist);
+      evaluate_moves(p_temp, depth-1, temp_hist, scores);
     } else {
-      std::cout << temp_hist << ": " << std::fixed << std::setprecision(1) << p_temp.score() << std::endl;
+      scores[temp_hist] = p_temp.score();
     }
   }
 }
@@ -421,6 +422,7 @@ int main(int argc, char *argv[]) {
   // std::string input;
 
   // mlist_t good_moves;
+  eval_t scores;
 
   // p1.print();
   int depth;
@@ -429,8 +431,15 @@ int main(int argc, char *argv[]) {
   } else {
     depth = 2;
   }
-  evaluate_moves(p1, depth, "");
-
+  evaluate_moves(p1, depth, "", scores);
+  std::cout << "searched " << scores.size() << " lines, best found is:" << std::endl;
+  auto best_move = std::max_element(
+                     scores.begin(), scores.end(),
+                     [] (const std::pair<std::string, float> &p1, const std::pair<std::string, float> &p2) {
+                       return p1.second < p2.second;
+                     }
+                   );
+  std::cout << best_move->first << " with score: " << std::fixed << std::setprecision(1) << best_move->second << std::endl;
   // std::cin >> input;
   // while(input != "q") {
   //   auto it = good_moves.find(input);
