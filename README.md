@@ -7,6 +7,7 @@ Kinda overambitious ¯\\_(ツ)_/¯
 # Performance
 
 searching 8 moves deep takes 17s using Ryzen 5 3600x on WSL2
+
 searching 8 moves deep takes 39s using M1 MacBook Air
 
 # Todo
