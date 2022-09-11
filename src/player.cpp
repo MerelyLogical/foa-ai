@@ -95,6 +95,14 @@ int Player::score_tools () {
 
 int Player::next_turn() {
   turn_number++;
+  // autumn
+  if (turn_number % 8 == 5) {
+    board_status.reset();
+  }
+  // spring
+  if (turn_number % 8 == 1 ) {
+    board_status.reset();
+  }
   return turn_number;
 }
 

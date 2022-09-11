@@ -13,29 +13,28 @@ enum resource_t: int {wood, timber, clay, brick,
                       fishtrap, fleshingbeam, weavingloom, slaughteringtable,
                       spade, shovel, potterywheel, oven, axe, workbench};
 
-enum action_t: int {
-fisherman,
-summergrocer,
-woolweaver,
-colonist,
-peatcutter,
-dikebuilder,
-clayworker,
-farmer,
-forester,
-woodcutter,
-summermaster,
-peatboats,
-tanner,
-linenweaver,
-butcher,
-cattletrader,
-wintergrocer,
-buildersmerchant,
-potter,
-baker,
-woodtrader,
-wintermaster};
+enum action_t: int {fisherman,
+                    summergrocer,
+                    woolweaver,
+                    colonist,
+                    peatcutter,
+                    dikebuilder,
+                    clayworker,
+                    farmer,
+                    forester,
+                    woodcutter,
+                    summermaster,
+                    peatboats,
+                    tanner,
+                    linenweaver,
+                    butcher,
+                    cattletrader,
+                    wintergrocer,
+                    buildersmerchant,
+                    potter,
+                    baker,
+                    woodtrader,
+                    wintermaster};
 
 enum season_t: int { spring, summer, autumn, winter };
 
@@ -80,6 +79,30 @@ typedef struct Board {
   bool baker = false;
   bool woodtrader = false;
   bool wintermaster = false;
+  void reset() {
+    fisherman = false;
+    summergrocer = false;
+    woolweaver = false;
+    colonist = false;
+    peatcutter = false;
+    dikebuilder = false;
+    clayworker = false;
+    farmer = false;
+    forester = false;
+    woodcutter = false;
+    summermaster = false;
+    peatboats = false;
+    tanner = false;
+    linenweaver = false;
+    butcher = false;
+    cattletrader = false;
+    wintergrocer = false;
+    buildersmerchant = false;
+    potter = false;
+    baker = false;
+    woodtrader = false;
+    wintermaster = false;
+  }
 } board_t;
 
 class Player {
