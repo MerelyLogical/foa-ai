@@ -293,9 +293,9 @@ void evaluate_moves (Player &p, mlist_t moves, int depth, std::string history, s
 
 void multithread_eval (Player &p, mlist_t moves, int depth) {
   int width = moves.size();
-  std::thread threads[width];
-  std::string lines[width] = { "" };
-  float scores[width] = { 0 };
+  std::vector<std::thread> threads;
+  std::vector<std::string> lines(width, "");
+  std::vector<float> scores(width, 0.0);
   int index = 0;
 
   for (auto& it: moves) {
@@ -318,7 +318,7 @@ void multithread_eval (Player &p, mlist_t moves, int depth) {
     // search recursively from p_temp
     mlist_t temp_moves = get_good_moves(p_temp);
     if (depth > 0 && !temp_moves.empty()) {
-      threads[index] = std::thread(evaluate_moves, std::ref(p_temp), temp_moves, depth-1, temp_hist, std::ref(lines[index]), std::ref(scores[index]));
+      threads.push_back(std::thread(evaluate_moves, std::ref(p_temp), temp_moves, depth-1, temp_hist, std::ref(lines[index]), std::ref(scores[index])));
     }
 
     index++;
