@@ -56,176 +56,202 @@ mlist_t get_good_moves (Player &p) {
     }
 
     // grocer
-    resource_t gsc[5] = {timber, brick, sheep, cattle, horse};
-    char gsc_names[5] = {'t', 'b', 's', 'c', 'h'};
-    for (int i=0; i<5; i++) {
-      move_command = "gs";
-      move_command.push_back(gsc_names[i]);
-      resource_t choice = gsc[i];
-      rlist = {{choice, 1}, {grain, 1}, {leather, 1}};
-      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, summergrocer}; }
+    if (!p.board_status.summergrocer) {
+      resource_t gsc[5] = {timber, brick, sheep, cattle, horse};
+      char gsc_names[5] = {'t', 'b', 's', 'c', 'h'};
+      for (int i=0; i<5; i++) {
+        move_command = "gs";
+        move_command.push_back(gsc_names[i]);
+        resource_t choice = gsc[i];
+        rlist = {{choice, 1}, {grain, 1}, {leather, 1}};
+        if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, summergrocer}; }
+      }
     }
 
     // wool weaver
-    int wool_cost = std::min(p.get(weavingloom), p.get(wool));
-    if (wool_cost != 0) {
-      move_command = "ww" + std::to_string(wool_cost);
-      rlist = {{wool, -wool_cost}, {woolen, wool_cost}};
-      mlist[move_command] = {rlist, woolweaver};
+    if (!p.board_status.woolweaver) {
+      int wool_cost = std::min(p.get(weavingloom), p.get(wool));
+      if (wool_cost != 0) {
+        move_command = "ww" + std::to_string(wool_cost);
+        rlist = {{wool, -wool_cost}, {woolen, wool_cost}};
+        mlist[move_command] = {rlist, woolweaver};
+      }
     }
 
-    // case colonist:
-    //   p.add(horse, 1);
-    //   // TODO: add moor tile flipping
-    //   break;
+      // case colonist:
+      //   p.add(horse, 1);
+      //   // TODO: add moor tile flipping
+      //   break;
 
     // peat cutter
-    int peat_cut = std::min(p.get(spade), p.get(uncutpeat));
-    if (peat_cut != 0) {
-      move_command = "pc" + std::to_string(peat_cut);
-      rlist = {{uncutpeat, -peat_cut}, {peat, peat_cut}};
-      mlist[move_command] = {rlist, peatcutter};
+    if (!p.board_status.peatcutter) {
+      int peat_cut = std::min(p.get(spade), p.get(uncutpeat));
+      if (peat_cut != 0) {
+        move_command = "pc" + std::to_string(peat_cut);
+        rlist = {{uncutpeat, -peat_cut}, {peat, peat_cut}};
+        mlist[move_command] = {rlist, peatcutter};
+      }
     }
 
-    // case dikebuilder1:
-    //   p.add(sheep, 1);
-    //   // TODO: add dike building
-    //   break;
-    // case dikebuilder2:
-    //   p.add(cattle, 1);
-    //   // TODO: add dike building
-    //   break
+      // case dikebuilder1:
+      //   p.add(sheep, 1);
+      //   // TODO: add dike building
+      //   break;
+      // case dikebuilder2:
+      //   p.add(cattle, 1);
+      //   // TODO: add dike building
+      //   break
 
     // clayworker
-    move_command = "cw";
-    rlist = {{clay, p.get(shovel)}};
-    mlist[move_command] = {rlist, clayworker};
+    if (!p.board_status.clayworker) {
+      move_command = "cw";
+      rlist = {{clay, p.get(shovel)}};
+      mlist[move_command] = {rlist, clayworker};
+    }
 
-    // case farmer:
-    //   // TODO: add buy plow
-    //   // TODO: add building farms
-    //   // TODO: figure out how to deal with grain vs flax choices per field
-    //   break;
-    // case forester:
-    //   p.use(food, 1); // TODO: this is a requirement, add valid checks
-    //   // TODO: add build forest
-    //   // TODO: add build building
-    //   break;
+      // case farmer:
+      //   // TODO: add buy plow
+      //   // TODO: add building farms
+      //   // TODO: figure out how to deal with grain vs flax choices per field
+      //   break;
+      // case forester:
+      //   p.use(food, 1); // TODO: this is a requirement, add valid checks
+      //   // TODO: add build forest
+      //   // TODO: add build building
+      //   break;
 
     // woodcutter
-    move_command = "wc";
-    rlist = {{wood, p.get(axe)}};
-    mlist[move_command] = {rlist, woodcutter};
-    // case master:
-    //   // TODO: figure out how to deal with upgrading variable number of tools
-    //   break;
+    if (!p.board_status.woodcutter) {
+      move_command = "wc";
+      rlist = {{wood, p.get(axe)}};
+      mlist[move_command] = {rlist, woodcutter};
+    }
+      // case master:
+      //   // TODO: figure out how to deal with upgrading variable number of tools
+      //   break;
 
   } else if (season == winter) {
     // TODO: peatboats
 
     // tanner
-    int hide_cost = std::min(p.get(fleshingbeam), p.get(hide));
-    if (hide_cost != 0) {
-      move_command = "ta" + std::to_string(hide_cost);
-      rlist = {{hide, -hide_cost}, {leather, hide_cost}};
-      mlist[move_command] = {rlist, tanner};
+    if (!p.board_status.tanner) {
+      int hide_cost = std::min(p.get(fleshingbeam), p.get(hide));
+      if (hide_cost != 0) {
+        move_command = "ta" + std::to_string(hide_cost);
+        rlist = {{hide, -hide_cost}, {leather, hide_cost}};
+        mlist[move_command] = {rlist, tanner};
+      }
     }
 
     // linen weaver
-    int flax_cost = std::min(p.get(weavingloom), p.get(flax));
-    if (flax_cost != 0) {
-      move_command = "lw" + std::to_string(flax_cost);
-      rlist = {{flax, -flax_cost}, {linen, flax_cost}};
-      mlist[move_command] = {rlist, linenweaver};
+    if (!p.board_status.linenweaver) {
+      int flax_cost = std::min(p.get(weavingloom), p.get(flax));
+      if (flax_cost != 0) {
+        move_command = "lw" + std::to_string(flax_cost);
+        rlist = {{flax, -flax_cost}, {linen, flax_cost}};
+        mlist[move_command] = {rlist, linenweaver};
+      }
     }
 
-    // TODO: butcher
+      // TODO: butcher
 
     // cattle trader
-    resource_t ctc[2] = {cattle, horse};
-    char ctc_names[2] = {'c', 'h'};
-    for (int i=0; i<2; i++) {
-      move_command = "ct";
-      move_command.push_back(ctc_names[i]);
-      resource_t choice = ctc[i];
-      rlist = {{grain, 2}, {sheep, 1}, {choice, 1}};
-      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, cattletrader}; }
+    if (!p.board_status.cattletrader) {
+      resource_t ctc[2] = {cattle, horse};
+      char ctc_names[2] = {'c', 'h'};
+      for (int i=0; i<2; i++) {
+        move_command = "ct";
+        move_command.push_back(ctc_names[i]);
+        resource_t choice = ctc[i];
+        rlist = {{grain, 2}, {sheep, 1}, {choice, 1}};
+        if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, cattletrader}; }
+      }
     }
 
     // grocer
-    resource_t gwc[3] = {sheep, cattle, horse};
-    char gwc_names[3] = {'s', 'c', 'h'};
-    for (int i=0; i<3; i++) {
-      move_command = "gw";
-      move_command.push_back(gwc_names[i]);
-      resource_t choice = gwc[i];
-      rlist = {{uncutpeat, -1}, {peat, 1}, {choice, 1}, {wood, 1}, {brick, 1}};
-      // TODO: maybe allow it even without cut peat?
-      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, wintergrocer}; }
+    if (!p.board_status.wintergrocer) {
+      resource_t gwc[3] = {sheep, cattle, horse};
+      char gwc_names[3] = {'s', 'c', 'h'};
+      for (int i=0; i<3; i++) {
+        move_command = "gw";
+        move_command.push_back(gwc_names[i]);
+        resource_t choice = gwc[i];
+        rlist = {{uncutpeat, -1}, {peat, 1}, {choice, 1}, {wood, 1}, {brick, 1}};
+        // TODO: maybe allow it even without cut peat?
+        if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, wintergrocer}; }
+      }
     }
 
     // builders' merchant
-    resource_t bmc1[2] = {wood, clay};
-    char bmc1_names[2] = {'w', 'c'};
-    resource_t bmc2[2] = {timber, brick};
-    char bmc2_names[2] = {'t', 'b'};
-    for (int i=0; i<2; i++) {
-      for (int j=0; j<2; j++) {
-        move_command = "bm";
-        move_command.push_back(bmc1_names[i]);
-        resource_t c1 = bmc1[i];
-        move_command.push_back(bmc2_names[j]);
-        resource_t c2 = bmc2[j];
-        rlist = {{hide, 2}, {c1, 1}, {c2, 1}};
-        if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, buildersmerchant}; }
+    if (!p.board_status.buildersmerchant) {
+      resource_t bmc1[2] = {wood, clay};
+      char bmc1_names[2] = {'w', 'c'};
+      resource_t bmc2[2] = {timber, brick};
+      char bmc2_names[2] = {'t', 'b'};
+      for (int i=0; i<2; i++) {
+        for (int j=0; j<2; j++) {
+          move_command = "bm";
+          move_command.push_back(bmc1_names[i]);
+          resource_t c1 = bmc1[i];
+          move_command.push_back(bmc2_names[j]);
+          resource_t c2 = bmc2[j];
+          rlist = {{hide, 2}, {c1, 1}, {c2, 1}};
+          if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, buildersmerchant}; }
+        }
       }
     }
 
     // potter
-    int clay_cost = std::min(p.get(potterywheel), p.get(clay));
-    if (clay_cost != 0) {
-      move_command = "po" + std::to_string(clay_cost);
-      rlist = {{clay, -clay_cost}, {food, 3*clay_cost}, {peat, clay_cost}};
-      mlist[move_command] = {rlist, potter};
+    if (!p.board_status.potter) {
+      int clay_cost = std::min(p.get(potterywheel), p.get(clay));
+      if (clay_cost != 0) {
+        move_command = "po" + std::to_string(clay_cost);
+        rlist = {{clay, -clay_cost}, {food, 3*clay_cost}, {peat, clay_cost}};
+        mlist[move_command] = {rlist, potter};
+      }
     }
 
     // baker
-    int gs = p.get(grain);
-    int ps = p.get(peat);
-    int bake_cost = std::min({
-      p.get(oven),
-      gs + p.get(flax),
-      ps + p.get(wood),
-      p.get_space(food) / 6 + (p.get_space(food) % 6 != 0)
-    });
-    if (bake_cost != 0) {
-      move_command = "ba" + std::to_string(bake_cost);
-      if (bake_cost > gs && bake_cost > ps) {
-        // not enough grain and not enough peat
-        rlist = {{grain, -gs}, {flax, gs-bake_cost}, {peat, -ps}, {wood, ps-bake_cost},
-                 {food, 6*bake_cost}};
-      } else if (bake_cost > gs) {
-        // not enough grain but enough peat
-        rlist = {{grain, -gs}, {flax, gs-bake_cost}, {peat, -bake_cost}, {food, 6*bake_cost}};
-      } else if (bake_cost > ps) {
-        // enough grain but not enough peat
-        rlist = {{grain, -bake_cost}, {peat, -ps}, {wood, ps-bake_cost}, {food, 6*bake_cost}};
-      } else {
-        // enough grain and enough peat
-        rlist = {{grain, -bake_cost}, {peat, -bake_cost}, {food, 6*bake_cost}};
+    if (!p.board_status.baker) {
+      int gs = p.get(grain);
+      int ps = p.get(peat);
+      int bake_cost = std::min({
+        p.get(oven),
+        gs + p.get(flax),
+        ps + p.get(wood),
+        p.get_space(food) / 6 + (p.get_space(food) % 6 != 0)
+      });
+      if (bake_cost != 0) {
+        move_command = "ba" + std::to_string(bake_cost);
+        if (bake_cost > gs && bake_cost > ps) {
+          // not enough grain and not enough peat
+          rlist = {{grain, -gs}, {flax, gs-bake_cost}, {peat, -ps}, {wood, ps-bake_cost},
+                   {food, 6*bake_cost}};
+        } else if (bake_cost > gs) {
+          // not enough grain but enough peat
+          rlist = {{grain, -gs}, {flax, gs-bake_cost}, {peat, -bake_cost}, {food, 6*bake_cost}};
+        } else if (bake_cost > ps) {
+          // enough grain but not enough peat
+          rlist = {{grain, -bake_cost}, {peat, -ps}, {wood, ps-bake_cost}, {food, 6*bake_cost}};
+        } else {
+          // enough grain and enough peat
+          rlist = {{grain, -bake_cost}, {peat, -bake_cost}, {food, 6*bake_cost}};
+        }
+        mlist[move_command] = {rlist, baker};
       }
-      mlist[move_command] = {rlist, baker};
     }
 
     // wood trader
     // TODO: add building
-    move_command = "wt";
-    if (p.get(food) == 0 && p.get(grain) > 0) {
-      rlist = {{grain, -1}, {wood, 4}};
-    } else {
-      rlist = {{food, -1}, {wood, 4}};
+    if (!p.board_status.woodtrader) {
+      move_command = "wt";
+      if (p.get(food) == 0 && p.get(grain) > 0) {
+        rlist = {{grain, -1}, {wood, 4}};
+      } else {
+        rlist = {{food, -1}, {wood, 4}};
+      }
+      mlist[move_command] = {rlist, wintermaster};
     }
-    mlist[move_command] = {rlist, wintermaster};
 
     // TODO:master
 
