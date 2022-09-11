@@ -273,6 +273,7 @@ Player::Player(const Player &p) {
   r_axe = p.r_axe;
   r_workbench = p.r_workbench;
   turn_number = p.turn_number;
+  board_status = p.board_status;
 }
 
 void Player::print() {
