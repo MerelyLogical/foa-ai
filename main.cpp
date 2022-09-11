@@ -368,6 +368,16 @@ mlist_t get_good_moves (Player &p) {
     mlist[move_command] = rlist;
   }
 
+  // repeating for woodcutter
+  move_command = "wc";
+  rlist = {{wood, p.get(axe)}};
+  mlist[move_command] = rlist;
+
+  // repeating for clayworker
+  move_command = "cw";
+  rlist = {{clay, p.get(shovel)}};
+  mlist[move_command] = rlist;
+
   // case colonist:
   //   p.add(horse, 1);
   //   // TODO: add moor tile flipping
@@ -380,9 +390,6 @@ mlist_t get_good_moves (Player &p) {
   //   p.add(cattle, 1);
   //   // TODO: add dike building
   //   break;
-  // case clayworker:
-  //   p.add(clay, p.get(shovel));
-  //   break;
   // case farmer:
   //   // TODO: add buy plow
   //   // TODO: add building farms
@@ -393,9 +400,6 @@ mlist_t get_good_moves (Player &p) {
   //   // TODO: add build forest
   //   // TODO: add build building
   //   break;
-  // case woodcutter:
-  //   p.add(wood, p.get(axe));
-  //   break;
   // case master:
   //   // TODO: figure out how to deal with upgrading variable number of tools
   //   break;
@@ -403,32 +407,39 @@ mlist_t get_good_moves (Player &p) {
   return mlist;
 }
 
-// TODO: keep more than just the one best move
-void evaluate_moves (Player &p, int depth, std::string history, std::string &best_line, float &best_score) {
-  mlist_t temp_moves = get_good_moves(p);
-  for (auto& it: temp_moves) {
+// TODO: keep more than just the one best move?
+void evaluate_moves (Player &p, mlist_t moves, int depth, std::string history, std::string &best_line, float &best_score) {
+  for (auto& it: moves) {
     Player p_temp = p;
     std::string temp_hist;
     if (history.empty()) {
       temp_hist = it.first;
     } else {
-      temp_hist = history + " " + it.first;
+      temp_hist = history + ">" + it.first;
     }
     perform_action(p_temp, it.second);
-    if (depth != 0) {
-      evaluate_moves(p_temp, depth-1, temp_hist, best_line, best_score);
-    } else {
-      // end of the chain, start scoring
-      float temp_score = p_temp.score();
-      if (temp_score > best_score) {
-        best_line = temp_hist;
-        best_score = temp_score;
-      }
+    float temp_score = p_temp.score();
+    // TODO: counting the number of spaces to get move lengths seems dumb
+    int move_length = std::count(best_line.begin(), best_line.end(), '>');
+    int temp_length = std::count(temp_hist.begin(), temp_hist.end(), '>');
+
+    // record line that is better or achieve the same score in less moves
+    if ((temp_score > best_score) ||
+        (temp_score == best_score && move_length > temp_length)) {
+      best_line = temp_hist;
+      best_score = temp_score;
+    }
+
+    // search recursively from p_temp
+    mlist_t temp_moves = get_good_moves(p_temp);
+    if (depth > 0 && !temp_moves.empty()) {
+      evaluate_moves(p_temp, temp_moves, depth-1, temp_hist, best_line, best_score);
     }
   }
 }
 
 // TODO: consider pulling some logic out from main function
+// TODO: set timer for evaluate_move, keep searching higher depths until timer run out
 int main() {
   Player p1;
   std::string input;
@@ -447,19 +458,20 @@ int main() {
 
   while(input != "q") {
     if (input == "ai") {
-      std::string best_line;
-      float best_score;
+      // use evaluate_moves with timer
+      std::string best_line = "";
+      float best_score = 0.0;
       int depth;
-
       std::cout << "Enter search depth:" << std::endl;
       std::cin >> depth;
       auto start = std::chrono::steady_clock::now();
-      evaluate_moves(p1, depth, "", best_line, best_score);
+      evaluate_moves(p1, good_moves, depth, "", best_line, best_score);
       auto stop = std::chrono::steady_clock::now();
       auto time = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
       std::cout << "In " << time.count() << "ms," << std::endl;
       std::cout << "Found best line: " << best_line << " with score: " << std::fixed << std::setprecision(1) << best_score << std::endl;
     } else {
+      // normal playing
       auto it = good_moves.find(input);
       if (it != good_moves.end()) {
         perform_action(p1, it->second);
@@ -476,8 +488,13 @@ int main() {
         std::cout << "bad instruction" << std::endl;
       }
     }
-    std::cout << "Pick a move: " << std::flush;
-    std::cin >> input;
+    if (good_moves.empty()) {
+      std::cout << "No more moves, game over." << std::endl;
+      break;
+    } else {
+      std::cout << "Pick a move: " << std::flush;
+      std::cin >> input;
+    }
   }
 
   return 0;
