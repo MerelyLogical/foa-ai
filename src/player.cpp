@@ -75,21 +75,21 @@ int Player::score_animals () {
 
 int Player::score_tools () {
   int sum = 0;
-  if (r_fishtrap.get() == 6) { sum += 6; };
-  if (r_fleshingbeam.get() == 5) { sum += 2; };
-  if (r_fleshingbeam.get() == 6) { sum += 6; };
-  if (r_weavingloom.get() == 3) { sum += 2; };
-  if (r_weavingloom.get() == 4) { sum += 6; };
-  if (r_weavingloom.get() == 5) { sum += 8; };
-  if (r_slaughteringtable.get() == 3) { sum += 2; };
-  if (r_slaughteringtable.get() == 4) { sum += 4; };
-  if (r_spade.get() == 7) { sum += 4; };
-  if (r_potterywheel.get() == 4) { sum += 4; };
-  if (r_oven.get() == 2) { sum += 2; };
-  if (r_oven.get() == 3) { sum += 10; };
-  if (r_oven.get() == 4) { sum += 14; };
-  if (r_workbench.get() == 3) { sum += 2; };
-  if (r_workbench.get() == 4) { sum += 8; };
+  if (r_fishtrap.get() == 6)          { sum +=  6; };
+  if (r_fleshingbeam.get() == 5)      { sum +=  2; };
+  if (r_fleshingbeam.get() == 6)      { sum +=  6; };
+  if (r_weavingloom.get() == 3)       { sum +=  2; };
+  if (r_weavingloom.get() == 4)       { sum +=  6; };
+  if (r_weavingloom.get() == 5)       { sum +=  8; };
+  if (r_slaughteringtable.get() == 3) { sum +=  2; };
+  if (r_slaughteringtable.get() == 4) { sum +=  4; };
+  if (r_spade.get() == 7)             { sum +=  4; };
+  if (r_potterywheel.get() == 4)      { sum +=  4; };
+  if (r_oven.get() == 2)              { sum +=  2; };
+  if (r_oven.get() == 3)              { sum += 10; };
+  if (r_oven.get() == 4)              { sum += 14; };
+  if (r_workbench.get() == 3)         { sum +=  2; };
+  if (r_workbench.get() == 4)         { sum +=  8; };
   return sum;
 }
 
@@ -250,38 +250,38 @@ Player::Player():
   }
 
 Player::Player(const Player &p) {
-  r_wood = p.r_wood;
-  r_timber = p.r_timber;
-  r_clay = p.r_clay;
-  r_brick = p.r_brick;
-  r_peat = p.r_peat;
-  r_uncutpeat = p.r_uncutpeat;
-  r_food = p.r_food;
-  r_grain = p.r_grain;
-  r_flax = p.r_flax;
-  r_wool = p.r_wool;
-  r_hide = p.r_hide;
-  r_linen = p.r_linen;
-  r_leather = p.r_leather;
-  r_woolen = p.r_woolen;
-  r_summerwear = p.r_summerwear;
-  r_leatherwear = p.r_leatherwear;
-  r_winterwear = p.r_winterwear;
-  r_sheep = p.r_sheep;
-  r_cattle = p.r_cattle;
-  r_horse = p.r_horse;
-  r_fishtrap = p.r_fishtrap;
-  r_fleshingbeam = p.r_fleshingbeam;
-  r_weavingloom = p.r_weavingloom;
+  r_wood =              p.r_wood;
+  r_timber =            p.r_timber;
+  r_clay =              p.r_clay;
+  r_brick =             p.r_brick;
+  r_peat =              p.r_peat;
+  r_uncutpeat =         p.r_uncutpeat;
+  r_food =              p.r_food;
+  r_grain =             p.r_grain;
+  r_flax =              p.r_flax;
+  r_wool =              p.r_wool;
+  r_hide =              p.r_hide;
+  r_linen =             p.r_linen;
+  r_leather =           p.r_leather;
+  r_woolen =            p.r_woolen;
+  r_summerwear =        p.r_summerwear;
+  r_leatherwear =       p.r_leatherwear;
+  r_winterwear =        p.r_winterwear;
+  r_sheep =             p.r_sheep;
+  r_cattle =            p.r_cattle;
+  r_horse =             p.r_horse;
+  r_fishtrap =          p.r_fishtrap;
+  r_fleshingbeam =      p.r_fleshingbeam;
+  r_weavingloom =       p.r_weavingloom;
   r_slaughteringtable = p.r_slaughteringtable;
-  r_spade = p.r_spade;
-  r_shovel = p.r_shovel;
-  r_potterywheel = p.r_potterywheel;
-  r_oven = p.r_oven;
-  r_axe = p.r_axe;
-  r_workbench = p.r_workbench;
-  turn_number = p.turn_number;
-  board_status = p.board_status;
+  r_spade =             p.r_spade;
+  r_shovel =            p.r_shovel;
+  r_potterywheel =      p.r_potterywheel;
+  r_oven =              p.r_oven;
+  r_axe =               p.r_axe;
+  r_workbench =         p.r_workbench;
+  turn_number =         p.turn_number;
+  board_status =        p.board_status;
 }
 
 void Player::print() {

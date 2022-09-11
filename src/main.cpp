@@ -260,7 +260,6 @@ mlist_t get_good_moves (Player &p) {
   return mlist;
 }
 
-// TODO: keep more than just the one best move?
 void evaluate_moves (Player &p, mlist_t moves, int depth, std::string history, std::string &best_line, float &best_score) {
   for (auto& it: moves) {
     Player p_temp = p;
@@ -328,13 +327,17 @@ void multithread_eval (Player &p, mlist_t moves, int depth) {
     th.join();
   }
 
+  float best_score = *max_element(scores.begin(), scores.end());
+
   for (int i=0; i<width; i++) {
-    std::cout << lines[i] << " : " << scores[i] << std::endl;
+    if (scores[i] >= best_score) {
+      std::cout << lines[i] << " : " << std::fixed << std::setprecision(1) << scores[i] << std::endl;
+    }
   }
 }
+
 // TODO: consider pulling some logic out from main function
 // TODO: set timer for evaluate_move, keep searching higher depths until timer run out
-// TODO: consider multithreading the first layer of evaluate_move
 int main() {
   Player p1;
   std::string input;
@@ -354,17 +357,17 @@ int main() {
   while(input != "q") {
     if (input == "ai") {
       // use evaluate_moves with timer
-      std::string best_line = "";
-      float best_score = 0.0;
+      // std::string best_line = "";
+      // float best_score = 0.0;
       int depth;
       std::cout << "Enter search depth:" << std::endl;
       std::cin >> depth;
       auto start = std::chrono::steady_clock::now();
-      multithread_eval(p1, good_moves, depth);
+      multithread_eval(p1, good_moves, depth-1);
       auto stop = std::chrono::steady_clock::now();
       auto time = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
-      std::cout << "In " << time.count() << "ms," << std::endl;
-      std::cout << "Found best line: " << best_line << " with score: " << std::fixed << std::setprecision(1) << best_score << std::endl;
+      std::cout << "Time taken: " << time.count() << "ms" << std::endl;
+      // std::cout << "Found best line: " << best_line << " with score: " << std::fixed << std::setprecision(1) << best_score << std::endl;
     } else {
       // normal playing
       auto it = good_moves.find(input);
