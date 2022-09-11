@@ -9,7 +9,7 @@
 #include "player.h"
 
 typedef std::unordered_map<resource_t, int> rlist_t;
-typedef std::unordered_map<std::string, rlist_t> mlist_t;
+typedef std::unordered_map<std::string, std::pair<rlist_t, action_t>> mlist_t;
 
 bool check_move_useful (Player &p, rlist_t rlist) {
   for (auto& it: rlist) {
@@ -26,8 +26,7 @@ bool check_move_useful (Player &p, rlist_t rlist) {
   return true;
 }
 
-void perform_action (Player &p, rlist_t rlist) {
-  p.next_turn();
+void perform_action (Player &p, rlist_t rlist, action_t action_type) {
   for (auto& it: rlist) {
     if (it.second > 0) {
       p.add(it.first, it.second);
@@ -35,6 +34,9 @@ void perform_action (Player &p, rlist_t rlist) {
       p.use(it.first, -it.second);
     }
   }
+  // TODO: this should be under board class in the future
+  p.mark_action(action_type); // mark board action space as taken
+  p.next_turn();
 }
 
 mlist_t get_good_moves (Player &p) {
@@ -43,13 +45,15 @@ mlist_t get_good_moves (Player &p) {
   rlist_t rlist;
 
   season_t season = p.get_season();
+  // TODO: try make these actions into functions/loop
   if (season == summer) {
-    // TODO: try make these actions into functions/loop
     // fisherman
-    move_command = "fm";
-    rlist = {{sheep, 1}, {fishtrap, 1}, {food, p.get(fishtrap)}};
-    // TODO: maybe just check for validity, can still be useful to take food with max fishtraps
-    if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
+    if (!p.board_status.fisherman) {
+      move_command = "fm";
+      rlist = {{sheep, 1}, {fishtrap, 1}, {food, p.get(fishtrap)}};
+      // TODO: maybe just check for validity, can still be useful to take food with max fishtraps
+      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, fisherman}; }
+    }
 
     // grocer
     resource_t gsc[5] = {timber, brick, sheep, cattle, horse};
@@ -59,7 +63,7 @@ mlist_t get_good_moves (Player &p) {
       move_command.push_back(gsc_names[i]);
       resource_t choice = gsc[i];
       rlist = {{choice, 1}, {grain, 1}, {leather, 1}};
-      if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
+      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, summergrocer}; }
     }
 
     // wool weaver
@@ -67,7 +71,7 @@ mlist_t get_good_moves (Player &p) {
     if (wool_cost != 0) {
       move_command = "ww" + std::to_string(wool_cost);
       rlist = {{wool, -wool_cost}, {woolen, wool_cost}};
-      mlist[move_command] = rlist;
+      mlist[move_command] = {rlist, woolweaver};
     }
 
     // case colonist:
@@ -80,7 +84,7 @@ mlist_t get_good_moves (Player &p) {
     if (peat_cut != 0) {
       move_command = "pc" + std::to_string(peat_cut);
       rlist = {{uncutpeat, -peat_cut}, {peat, peat_cut}};
-      mlist[move_command] = rlist;
+      mlist[move_command] = {rlist, peatcutter};
     }
 
     // case dikebuilder1:
@@ -95,7 +99,7 @@ mlist_t get_good_moves (Player &p) {
     // clayworker
     move_command = "cw";
     rlist = {{clay, p.get(shovel)}};
-    mlist[move_command] = rlist;
+    mlist[move_command] = {rlist, clayworker};
 
     // case farmer:
     //   // TODO: add buy plow
@@ -111,7 +115,7 @@ mlist_t get_good_moves (Player &p) {
     // woodcutter
     move_command = "wc";
     rlist = {{wood, p.get(axe)}};
-    mlist[move_command] = rlist;
+    mlist[move_command] = {rlist, woodcutter};
     // case master:
     //   // TODO: figure out how to deal with upgrading variable number of tools
     //   break;
@@ -124,7 +128,7 @@ mlist_t get_good_moves (Player &p) {
     if (hide_cost != 0) {
       move_command = "ta" + std::to_string(hide_cost);
       rlist = {{hide, -hide_cost}, {leather, hide_cost}};
-      mlist[move_command] = rlist;
+      mlist[move_command] = {rlist, tanner};
     }
 
     // linen weaver
@@ -132,7 +136,7 @@ mlist_t get_good_moves (Player &p) {
     if (flax_cost != 0) {
       move_command = "lw" + std::to_string(flax_cost);
       rlist = {{flax, -flax_cost}, {linen, flax_cost}};
-      mlist[move_command] = rlist;
+      mlist[move_command] = {rlist, linenweaver};
     }
 
     // TODO: butcher
@@ -145,7 +149,7 @@ mlist_t get_good_moves (Player &p) {
       move_command.push_back(ctc_names[i]);
       resource_t choice = ctc[i];
       rlist = {{grain, 2}, {sheep, 1}, {choice, 1}};
-      if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
+      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, cattletrader}; }
     }
 
     // grocer
@@ -157,7 +161,7 @@ mlist_t get_good_moves (Player &p) {
       resource_t choice = gwc[i];
       rlist = {{uncutpeat, -1}, {peat, 1}, {choice, 1}, {wood, 1}, {brick, 1}};
       // TODO: maybe allow it even without cut peat?
-      if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
+      if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, wintergrocer}; }
     }
 
     // builders' merchant
@@ -173,7 +177,7 @@ mlist_t get_good_moves (Player &p) {
         move_command.push_back(bmc2_names[j]);
         resource_t c2 = bmc2[j];
         rlist = {{hide, 2}, {c1, 1}, {c2, 1}};
-        if (check_move_useful(p, rlist)) { mlist[move_command] = rlist; }
+        if (check_move_useful(p, rlist)) { mlist[move_command] = {rlist, buildersmerchant}; }
       }
     }
 
@@ -182,7 +186,7 @@ mlist_t get_good_moves (Player &p) {
     if (clay_cost != 0) {
       move_command = "po" + std::to_string(clay_cost);
       rlist = {{clay, -clay_cost}, {food, 3*clay_cost}, {peat, clay_cost}};
-      mlist[move_command] = rlist;
+      mlist[move_command] = {rlist, potter};
     }
 
     // baker
@@ -210,7 +214,7 @@ mlist_t get_good_moves (Player &p) {
         // enough grain and enough peat
         rlist = {{grain, -bake_cost}, {peat, -bake_cost}, {food, 6*bake_cost}};
       }
-      mlist[move_command] = rlist;
+      mlist[move_command] = {rlist, baker};
     }
 
     // wood trader
@@ -221,7 +225,7 @@ mlist_t get_good_moves (Player &p) {
     } else {
       rlist = {{food, -1}, {wood, 4}};
     }
-    mlist[move_command] = rlist;
+    mlist[move_command] = {rlist, wintermaster};
 
     // TODO:master
 
@@ -239,7 +243,7 @@ void evaluate_moves (Player &p, mlist_t moves, int depth, std::string history, s
     } else {
       temp_hist = history + ">" + it.first;
     }
-    perform_action(p_temp, it.second);
+    perform_action(p_temp, it.second.first, it.second.second);
     float temp_score = p_temp.score();
     // TODO: counting the number of spaces to get move lengths seems dumb
     int move_length = std::count(best_line.begin(), best_line.end(), '>');
@@ -297,7 +301,7 @@ int main() {
       // normal playing
       auto it = good_moves.find(input);
       if (it != good_moves.end()) {
-        perform_action(p1, it->second);
+        perform_action(p1, it->second.first, it->second.second);
         // TODO: repeated code
         p1.print();
         good_moves = get_good_moves(p1);

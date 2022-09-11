@@ -98,6 +98,33 @@ int Player::next_turn() {
   return turn_number;
 }
 
+void Player::mark_action(action_t action_type) {
+  switch (action_type) {
+    case fisherman:         board_status.fisherman = true;        break;
+    case summergrocer:      board_status.summergrocer = true;     break;
+    case woolweaver:        board_status.woolweaver = true;       break;
+    case colonist:          board_status.colonist = true;         break;
+    case peatcutter:        board_status.peatcutter = true;       break;
+    case dikebuilder:       board_status.dikebuilder = true;      break;
+    case clayworker:        board_status.clayworker = true;       break;
+    case farmer:            board_status.farmer = true;           break;
+    case forester:          board_status.forester = true;         break;
+    case woodcutter:        board_status.woodcutter = true;       break;
+    case summermaster:      board_status.summermaster = true;     break;
+    case peatboats:         board_status.peatboats = true;        break;
+    case tanner:            board_status.tanner = true;           break;
+    case linenweaver:       board_status.linenweaver = true;      break;
+    case butcher:           board_status.butcher = true;          break;
+    case cattletrader:      board_status.cattletrader = true;     break;
+    case wintergrocer:      board_status.wintergrocer = true;     break;
+    case buildersmerchant:  board_status.buildersmerchant = true; break;
+    case potter:            board_status.potter = true;           break;
+    case baker:             board_status.baker = true;            break;
+    case woodtrader:        board_status.woodtrader = true;       break;
+    case wintermaster:      board_status.wintermaster = true;     break;
+  }
+}
+
 // season_t Player::get_season() {
 //   switch (turn_number % 10) {
 //     case 0:       return spring;
