@@ -93,6 +93,57 @@ int Player::score_tools () {
   return sum;
 }
 
+int Player::next_turn() {
+  turn_number++;
+  return turn_number;
+}
+
+// season_t Player::get_season() {
+//   switch (turn_number % 10) {
+//     case 0:       return spring;
+//     case 1 ... 4: return summer;
+//     case 5      : return autumn;
+//     case 6 ... 9: return winter;
+//     default:
+//       std::cout << "season error" << std::endl;
+//       return spring;
+//   }
+// }
+
+// std::string Player::get_season_str() {
+//   switch (turn_number % 10) {
+//     case 0:       return "Spring";
+//     case 1 ... 4: return "Summer";
+//     case 5      : return "Autumn";
+//     case 6 ... 9: return "Winter";
+//     default:
+//       std::cout << "season error" << std::endl;
+//       return "error";
+//   }
+// }
+
+season_t Player::get_season() {
+  switch (turn_number % 8) {
+    case 0:       return winter;
+    case 1 ... 4: return summer;
+    case 5 ... 7: return winter;
+    default:
+      std::cout << "season error" << std::endl;
+      return spring;
+  }
+}
+
+std::string Player::get_season_str() {
+  switch (turn_number % 8) {
+    case 0:       return "Winter";
+    case 1 ... 4: return "Summer";
+    case 5 ... 7: return "Winter";
+    default:
+      std::cout << "season error" << std::endl;
+      return "error";
+  }
+}
+
 int Player::use(resource_t name, int cost) {
   return r_lut.at(name).use(cost);
 }
@@ -159,7 +210,9 @@ Player::Player():
   r_potterywheel      (2,  4, 2),
   r_oven              (1,  4, 1),
   r_axe               (3,  6, 3),
-  r_workbench         (2,  4, 2) {}
+  r_workbench         (2,  4, 2) {
+    turn_number = 1;
+  }
 
 Player::Player(const Player &p) {
   r_wood = p.r_wood;
@@ -192,9 +245,13 @@ Player::Player(const Player &p) {
   r_oven = p.r_oven;
   r_axe = p.r_axe;
   r_workbench = p.r_workbench;
+  turn_number = p.turn_number;
 }
 
 void Player::print() {
+  std::cout << std::endl;
+  std::cout << "Turn " << turn_number << ", " << get_season_str() << std::endl;
+  std::cout << std::endl;
   std::cout << "wood/timber clay/brick peat/uncut" << std::endl;
   std::cout << std::setw(4) << r_wood.get() << std::setw(7) << r_timber.get()
             << std::setw(5) << r_clay.get() << std::setw(6) << r_brick.get()

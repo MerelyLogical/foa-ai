@@ -12,6 +12,9 @@ enum resource_t: int {wood, timber, clay, brick,
                       sheep, cattle, horse,
                       fishtrap, fleshingbeam, weavingloom, slaughteringtable,
                       spade, shovel, potterywheel, oven, axe, workbench};
+
+enum season_t: int { spring, summer, autumn, winter };
+
 class Resource {
   private:
     int max;
@@ -50,6 +53,7 @@ class Player {
     int score_tools ();
 
   public:
+    int turn_number;
     std::unordered_map<resource_t, Resource&> r_lut = {
       {wood, r_wood},
       {timber, r_timber},
@@ -82,6 +86,9 @@ class Player {
       {axe, r_axe},
       {workbench, r_workbench}
     };
+    int next_turn();
+    season_t get_season();
+    std::string get_season_str();
     int use(resource_t name, int cost);
     int add(resource_t name, int gain);
     int get(resource_t name);
