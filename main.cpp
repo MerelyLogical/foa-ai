@@ -297,14 +297,13 @@ class Player {
                 << " workbenches: " << r_workbench.get()
                 << std::endl;
       std::cout << std::endl;
-      std::cout << "score: " << score() << std::endl;
+      std::cout << "score: " << std::fixed << std::setprecision(1) << score() << std::endl;
       std::cout << std::endl;
     }
 };
 
 typedef std::unordered_map<resource_t, int> rlist_t;
 typedef std::unordered_map<std::string, rlist_t> mlist_t;
-typedef std::unordered_map<std::string, float> eval_t;
 
 bool check_move_useful (Player &p, rlist_t rlist) {
   for (auto& it: rlist) {
@@ -403,61 +402,69 @@ mlist_t get_good_moves (Player &p) {
   return mlist;
 }
 
-void evaluate_moves (Player &p, int depth, std::string history, eval_t &scores) {
+// TODO: keep more than just the one best move
+void evaluate_moves (Player &p, int depth, std::string history, std::string &best_line, float &best_score) {
   mlist_t temp_moves = get_good_moves(p);
   for (auto& it: temp_moves) {
     Player p_temp = p;
     std::string temp_hist = history + " " + it.first;
     perform_action(p_temp, it.second);
     if (depth != 0) {
-      evaluate_moves(p_temp, depth-1, temp_hist, scores);
+      evaluate_moves(p_temp, depth-1, temp_hist, best_line, best_score);
     } else {
-      scores[temp_hist] = p_temp.score();
+      // end of the chain, start scoring
+      float temp_score = p_temp.score();
+      if (temp_score > best_score) {
+        best_line = temp_hist;
+        best_score = temp_score;
+      }
     }
   }
 }
 
-int main(int argc, char *argv[]) {
+int main() {
   Player p1;
-  // std::string input;
+  std::string input;
+  mlist_t good_moves;
 
-  // mlist_t good_moves;
-  eval_t scores;
-
-  // p1.print();
-  int depth;
-  if (argc > 1) {
-    depth = atoi(argv[1]);
-  } else {
-    depth = 2;
+  p1.print();
+  good_moves = get_good_moves(p1);
+  std::cout << "Possible good moves: ";
+  for (auto &it: good_moves) {
+    std::cout << it.first << " ";
   }
-  evaluate_moves(p1, depth, "", scores);
-  std::cout << "searched " << scores.size() << " lines, best found is:" << std::endl;
-  auto best_move = std::max_element(
-                     scores.begin(), scores.end(),
-                     [] (const std::pair<std::string, float> &p1, const std::pair<std::string, float> &p2) {
-                       return p1.second < p2.second;
-                     }
-                   );
-  std::cout << best_move->first << " with score: " << std::fixed << std::setprecision(1) << best_move->second << std::endl;
-  // std::cin >> input;
-  // while(input != "q") {
-  //   auto it = good_moves.find(input);
-  //   if (it != good_moves.end()) {
-  //     perform_action(p1, it->second);
-  //   } else {
-  //     std::cout << "bad instruction" << std::endl;
-  //   }
+  std::cout << std::endl;
+  std::cout << "---------------------" << std::endl;
+  std::cin >> input;
 
-  //   // TODO: repeated code
-  //   p1.print();
-  //   good_moves = get_good_moves(p1);
-  //   for (auto &it: good_moves) {
-  //     std::cout << it.first << " ";
-  //   }
-  //   std::cout << std::endl;
-  //   std::cin >> input;
-  // }
+  while(input != "q") {
+    if (input == "ai") {
+      std::string best_line;
+      float best_score;
+      int depth;
+      std::cout << "Enter search depth:" << std::endl;
+      std::cin >> depth;
+      evaluate_moves(p1, depth, "", best_line, best_score);
+      std::cout << "Found best line: " << best_line << " with score: " << std::fixed << std::setprecision(1) << best_score << std::endl;
+    } else {
+      auto it = good_moves.find(input);
+      if (it != good_moves.end()) {
+        perform_action(p1, it->second);
+      } else {
+        std::cout << "bad instruction" << std::endl;
+      }
+      // TODO: repeated code
+      p1.print();
+      good_moves = get_good_moves(p1);
+      std::cout << "Possible good moves: ";
+      for (auto &it: good_moves) {
+        std::cout << it.first << " ";
+      }
+      std::cout << std::endl;
+      std::cout << "---------------------" << std::endl;
+    }
+    std::cin >> input;
+  }
 
   return 0;
 }
