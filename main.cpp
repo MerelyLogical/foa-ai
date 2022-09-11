@@ -4,6 +4,7 @@
 #include <cassert>
 #include <unordered_map>
 #include <vector>
+#include <chrono>
 
 enum resource_t: int {wood, timber, clay, brick,
                       peat, uncutpeat,
@@ -407,7 +408,12 @@ void evaluate_moves (Player &p, int depth, std::string history, std::string &bes
   mlist_t temp_moves = get_good_moves(p);
   for (auto& it: temp_moves) {
     Player p_temp = p;
-    std::string temp_hist = history + " " + it.first;
+    std::string temp_hist;
+    if (history.empty()) {
+      temp_hist = it.first;
+    } else {
+      temp_hist = history + " " + it.first;
+    }
     perform_action(p_temp, it.second);
     if (depth != 0) {
       evaluate_moves(p_temp, depth-1, temp_hist, best_line, best_score);
@@ -422,6 +428,7 @@ void evaluate_moves (Player &p, int depth, std::string history, std::string &bes
   }
 }
 
+// TODO: consider pulling some logic out from main function
 int main() {
   Player p1;
   std::string input;
@@ -435,6 +442,7 @@ int main() {
   }
   std::cout << std::endl;
   std::cout << "---------------------" << std::endl;
+  std::cout << "Pick a move: " << std::flush;
   std::cin >> input;
 
   while(input != "q") {
@@ -442,27 +450,33 @@ int main() {
       std::string best_line;
       float best_score;
       int depth;
+
       std::cout << "Enter search depth:" << std::endl;
       std::cin >> depth;
+      auto start = std::chrono::steady_clock::now();
       evaluate_moves(p1, depth, "", best_line, best_score);
+      auto stop = std::chrono::steady_clock::now();
+      auto time = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
+      std::cout << "In " << time.count() << "ms," << std::endl;
       std::cout << "Found best line: " << best_line << " with score: " << std::fixed << std::setprecision(1) << best_score << std::endl;
     } else {
       auto it = good_moves.find(input);
       if (it != good_moves.end()) {
         perform_action(p1, it->second);
+        // TODO: repeated code
+        p1.print();
+        good_moves = get_good_moves(p1);
+        std::cout << "Possible good moves: ";
+        for (auto &it: good_moves) {
+          std::cout << it.first << " ";
+        }
+        std::cout << std::endl;
+        std::cout << "---------------------" << std::endl;
       } else {
         std::cout << "bad instruction" << std::endl;
       }
-      // TODO: repeated code
-      p1.print();
-      good_moves = get_good_moves(p1);
-      std::cout << "Possible good moves: ";
-      for (auto &it: good_moves) {
-        std::cout << it.first << " ";
-      }
-      std::cout << std::endl;
-      std::cout << "---------------------" << std::endl;
     }
+    std::cout << "Pick a move: " << std::flush;
     std::cin >> input;
   }
 
