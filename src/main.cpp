@@ -5,6 +5,7 @@
 #include <unordered_map>
 #include <vector>
 #include <chrono>
+#include <thread>
 
 #include "player.h"
 
@@ -290,6 +291,47 @@ void evaluate_moves (Player &p, mlist_t moves, int depth, std::string history, s
   }
 }
 
+void multithread_eval (Player &p, mlist_t moves, int depth) {
+  int width = moves.size();
+  std::thread threads[width];
+  std::string lines[width] = { "" };
+  float scores[width] = { 0 };
+  int index = 0;
+
+  for (auto& it: moves) {
+    Player p_temp = p;
+    std::string temp_hist;
+    temp_hist = it.first;
+    perform_action(p_temp, it.second.first, it.second.second);
+    float temp_score = p_temp.score();
+    // TODO: counting the number of spaces to get move lengths seems dumb
+    int move_length = std::count(lines[index].begin(), lines[index].end(), '>');
+    int temp_length = std::count(temp_hist.begin(), temp_hist.end(), '>');
+
+    // record line that is better or achieve the same score in less moves
+    if ((temp_score > scores[index]) ||
+        (temp_score == scores[index] && move_length > temp_length)) {
+      lines[index] = temp_hist;
+      scores[index] = temp_score;
+    }
+
+    // search recursively from p_temp
+    mlist_t temp_moves = get_good_moves(p_temp);
+    if (depth > 0 && !temp_moves.empty()) {
+      threads[index] = std::thread(evaluate_moves, std::ref(p_temp), temp_moves, depth-1, temp_hist, std::ref(lines[index]), std::ref(scores[index]));
+    }
+
+    index++;
+  }
+
+  for (auto& th: threads) {
+    th.join();
+  }
+
+  for (int i=0; i<width; i++) {
+    std::cout << lines[i] << " : " << scores[i] << std::endl;
+  }
+}
 // TODO: consider pulling some logic out from main function
 // TODO: set timer for evaluate_move, keep searching higher depths until timer run out
 // TODO: consider multithreading the first layer of evaluate_move
@@ -318,7 +360,7 @@ int main() {
       std::cout << "Enter search depth:" << std::endl;
       std::cin >> depth;
       auto start = std::chrono::steady_clock::now();
-      evaluate_moves(p1, good_moves, depth, "", best_line, best_score);
+      multithread_eval(p1, good_moves, depth);
       auto stop = std::chrono::steady_clock::now();
       auto time = std::chrono::duration_cast<std::chrono::milliseconds>(stop - start);
       std::cout << "In " << time.count() << "ms," << std::endl;
