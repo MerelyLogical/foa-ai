@@ -246,12 +246,13 @@ mlist_t get_good_moves (Player &p) {
     // TODO: add building
     if (!p.board_status.woodtrader) {
       move_command = "wt";
-      if (p.get(food) == 0 && p.get(grain) > 0) {
-        rlist = {{grain, -1}, {wood, 4}};
-      } else {
+      if (p.get(food) > 0) {
         rlist = {{food, -1}, {wood, 4}};
+        mlist[move_command] = {rlist, woodtrader};
+      } else if (p.get(grain) > 0) {
+        rlist = {{grain, -1}, {wood, 4}};
+        mlist[move_command] = {rlist, woodtrader};
       }
-      mlist[move_command] = {rlist, wintermaster};
     }
 
     // TODO:master
@@ -317,7 +318,10 @@ void multithread_eval (Player &p, mlist_t moves, int depth) {
     // search recursively from p_temp
     mlist_t temp_moves = get_good_moves(p_temp);
     if (depth > 0 && !temp_moves.empty()) {
-      threads.push_back(std::thread(evaluate_moves, std::ref(p_temp), temp_moves, depth-1, temp_hist, std::ref(lines[index]), std::ref(scores[index])));
+      // p_temp is captured by value since it goes out of scope before the threads are joined
+      threads.push_back(std::thread([p_temp, temp_moves, depth, temp_hist, &line = lines[index], &score = scores[index]]() mutable {
+        evaluate_moves(p_temp, temp_moves, depth-1, temp_hist, line, score);
+      }));
     }
 
     index++;
